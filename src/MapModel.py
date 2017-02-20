@@ -11,5 +11,5 @@ MAP_SCAN_INFO_SERVICE = rospy.Service('/quirkd/map/scan/info', MapUpdate, MODEL.
 MAP_SCAN_UPDATE_SERVICE = rospy.Service('/quirkd/map/scan/update', MapUpdate, MODEL.map_scan_update)
 
 if __name__ == '__main__':
-    rospy.init_node('DataController')
+    rospy.init_node('MapModel')
     MODEL.init()
