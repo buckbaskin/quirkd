@@ -52,12 +52,16 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(
+  DIRECTORY
+  msg
   FILES
   Alert.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
+  DIRECTORY
+  srv
   FILES
   MapInfo.srv
   MapUpdate.srv
@@ -140,6 +144,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/quirkd_node.cpp)
+add_executable(map_model src/MapModel.cpp)
+target_link_libraries(map_model ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
