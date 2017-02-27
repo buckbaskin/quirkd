@@ -4,3 +4,7 @@ class UIManager(object):
 
     def init(self):
         pass
+
+    def notify(msg):
+        pass
+

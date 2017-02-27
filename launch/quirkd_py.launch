@@ -1,0 +1,3 @@
+<node pkg="quirkd" name="datapro" type="DataProcessor.py" output="screen"></node>
+<node pkg="quirkd" name="mapmodel" type="MapModel.py" output="screen"></node>
+<node pkg="quirkd" name="ui" type="UIManager.py" output="screen"></node>
