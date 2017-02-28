@@ -1,5 +1,6 @@
+#include "libquirkd/model.h"
+
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 #include "quirkd/Alert.h"
 
 #include <sstream>
@@ -9,22 +10,21 @@
  */
 
 int main(int argc, char**argv) {
-    ros::init(argc, argv, "MapModel_cpp");
+    ros::init(argc, argv, "map_model_cpp");
 
     ros::NodeHandle n;
+    MapHandler mh;
 
-    ros::Publisher pubber = n.advertise<std_msgs::String>("/quirkd", 10);
+    ros::Publisher pubber = n.advertise<quirkd::Alert>("/quirkd", 10);
 
     ros::Rate loop_rate(10);
 
     int count = 0;
+    quirkd::Alert msg;
     while(ros::ok()) {
-        std_msgs::String msg;
-        std::stringstream ss;
-        ss << "hello world" << count;
-        msg.data = ss.str();
+        msg.num = count;
 
-        ROS_INFO("%s", msg.data.c_str());
+        ROS_INFO("%d", msg.num);
 
         pubber.publish(msg);
         ros::spinOnce();

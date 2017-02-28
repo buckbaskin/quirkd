@@ -1,10 +1,10 @@
-#include <iostream>
-#include <string>
+#ifndef __MAPHANDLER_H_INCLUDED__
+#define __MAPHANDLER_H_INCLUDED__
 
-class MapModel {
-    private:
-        string myType;
+class MapHandler {
     public:
-        std::string map_info(string);
-        std::string map_update();
+        void foo();
+        int bar;
 };
+
+#endif // __MAPHANDLER_H_INCLUDED__
