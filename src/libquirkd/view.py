@@ -1,4 +1,4 @@
-from quirkd_lib.decorator import for_all_methods, logdebug_calls
+from libquirkd.decorator import for_all_methods, logdebug_calls
 
 @for_all_methods(logdebug_calls)
 class UIManager(object):

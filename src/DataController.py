@@ -3,7 +3,7 @@
 import rospy
 from quirkd.srv import MapInfo, MapUpdate, UserAction, UserActionResponse
 from quirkd.msg import Alert
-from quirkd_lib.controller import DataController
+from libquirkd.controller import DataController
 
 CONTROLLER = DataController()
 

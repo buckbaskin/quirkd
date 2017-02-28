@@ -2,7 +2,7 @@
 
 import rospy
 from quirkd.srv import MapInfo, MapUpdate
-from quirkd_lib.model import MapModel
+from libquirkd.model import MapModel
 
 MODEL = MapModel()
 

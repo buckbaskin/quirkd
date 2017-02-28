@@ -3,7 +3,7 @@
 import rospy
 from quirkd.srv import UserAction
 from quirkd.msg import Alert
-from quirkd_lib.view import UIManager
+from libquirkd import UIManager
 
 UI = UIManager()
 
