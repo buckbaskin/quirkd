@@ -24,7 +24,10 @@ int main(int argc, char**argv) {
     while(ros::ok()) {
         msg.num = count;
 
-        ROS_INFO("%d", msg.num);
+        std::stringstream ss;
+        ss << "hello world " << msg.num;
+
+        ROS_INFO("%s", ss.str().c_str());
 
         pubber.publish(msg);
         ros::spinOnce();
