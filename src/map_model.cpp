@@ -13,7 +13,7 @@ int main(int argc, char**argv) {
     ros::init(argc, argv, "map_model_cpp");
 
     ros::NodeHandle n;
-    MapHandler mh;
+    map_handler::MapHandler mh;
 
     ros::Publisher pubber = n.advertise<quirkd::Alert>("/quirkd", 10);
 
