@@ -1,7 +1,7 @@
 #include "model.cpp"
 
 #include "ros/ros.h"
-#include "quirkd/Alert.h"
+#include <quirkd/Alert.h>
 
 #include <sstream>
 
