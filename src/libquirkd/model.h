@@ -6,7 +6,7 @@
 #include <costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
 
-namespace map_handler {
+// namespace map_handler {
 
     class SimpleLayer {
         public:
@@ -22,10 +22,12 @@ namespace map_handler {
 
     class MapHandler {
         public:
+            MapHandler();
+            SimpleLayer scan_layer;
             void foo();
             int bar;
     };
 
-}
+// } // end namespace map_handler
 
 #endif // __MAPHANDLER_H_INCLUDED__

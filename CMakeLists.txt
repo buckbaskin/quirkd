@@ -131,9 +131,11 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/quirkd.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/libquirkd/model.cpp 
+  # src/${PROJECT_NAME}/libquirkd/view.cpp 
+  # src/${PROJECT_NAME}/libquirkd/controller.cpp 
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
