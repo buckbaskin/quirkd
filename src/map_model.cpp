@@ -1,4 +1,4 @@
-#include "libquirkd/model.h"
+#include "model.cpp"
 
 #include "ros/ros.h"
 #include "quirkd/Alert.h"
@@ -13,7 +13,7 @@ int main(int argc, char**argv) {
     ros::init(argc, argv, "map_model_cpp");
 
     ros::NodeHandle n;
-    model::MapHandler* mh = new model::MapHandler();
+    MapHandler* mh = new MapHandler();
 
     ros::Publisher pubber = n.advertise<quirkd::Alert>("/quirkd", 10);
 

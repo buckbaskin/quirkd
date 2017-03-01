@@ -113,8 +113,8 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES quirkd
+INCLUDE_DIRS include
+# LIBRARIES libquirkd
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime
 #  DEPENDS system_lib
 )
@@ -128,11 +128,12 @@ CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/libquirkd/model.cpp 
+    src/model.cpp 
   # src/${PROJECT_NAME}/libquirkd/view.cpp 
   # src/${PROJECT_NAME}/libquirkd/controller.cpp 
 )
@@ -146,8 +147,13 @@ add_library(${PROJECT_NAME}
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/quirkd_node.cpp)
-add_executable(map_model src/map_model.cpp)
-target_link_libraries(map_model ${catkin_LIBRARIES})
+add_executable(
+    map_model src/map_model.cpp
+)
+target_link_libraries(
+    map_model 
+    ${catkin_LIBRARIES}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

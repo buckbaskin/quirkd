@@ -6,7 +6,7 @@
 #include <costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
 
-namespace model {
+// namespace model {
 
     class SimpleLayer {
         public:
@@ -29,6 +29,6 @@ namespace model {
             int bar;
     };
 
-} // end namespace model
+// } // end namespace model
 
 #endif // __MAPHANDLER_H_INCLUDED__

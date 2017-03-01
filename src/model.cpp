@@ -1,8 +1,8 @@
-#include "model.h"
+#include <quirkd/model.h>
 
 // using costmap_2d::LETHAL_OBSTACLE;
 
-namespace model {
+// namespace model {
 
     SimpleLayer::SimpleLayer() {
         ROS_INFO("Simple Layer Constructor");
@@ -31,5 +31,5 @@ namespace model {
         this->bar += 1;
     }
 
-} // end namespace model
+// } // end namespace model
 
