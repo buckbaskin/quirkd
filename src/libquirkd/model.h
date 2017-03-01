@@ -6,7 +6,7 @@
 #include <costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
 
-// namespace map_handler {
+namespace model {
 
     class SimpleLayer {
         public:
@@ -16,7 +16,8 @@
             virtual void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
         private:
             void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
-            double mark_x_, mark_y;
+            double mark_x_;
+            double mark_y_;
             dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
     };
 
@@ -28,6 +29,6 @@
             int bar;
     };
 
-// } // end namespace map_handler
+} // end namespace model
 
 #endif // __MAPHANDLER_H_INCLUDED__
