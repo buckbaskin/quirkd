@@ -2,7 +2,7 @@
 
 // using costmap_2d::LETHAL_OBSTACLE;
 
-// namespace model {
+namespace model {
 
     SimpleLayer::SimpleLayer() {
         ROS_INFO("Simple Layer Constructor");
@@ -31,5 +31,5 @@
         this->bar += 1;
     }
 
-// } // end namespace model
+} // end namespace model
 
