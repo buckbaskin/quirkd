@@ -31,6 +31,10 @@ class DataController {
             }
             updated = false;
         }
+        void pub_alert_status() {
+            quirkd::Alert msg;
+            alert_pub_.publish(msg);
+        }
         bool updated;
         sensor_msgs::LaserScan last_data;
     private:
@@ -50,12 +54,14 @@ int main(int argc, char** argv) {
     ROS_INFO("3");
     ros::Rate r(30);
     ROS_INFO("4");
+    dp.update();
     while(ros::ok()) {
         ros::spinOnce();
         if (dp.updated) {
             dp.update();
             ROS_INFO("Processed message data in loop");
         }
+        dp.pub_alert_status();
         r.sleep();
     }
     ROS_INFO("Data Processor Exited.");
