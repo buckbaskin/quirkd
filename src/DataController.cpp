@@ -21,6 +21,7 @@ class DataController {
             last_data = msg;
             try {
                 tf_.lookupTransform("/map", "/base_laser_link", ros::Time(0), last_tf);
+                ROS_INFO("tf success for /map to /base_laser_link");
             } catch (tf::TransformException &ex) {
                 ROS_WARN("tf fetch failed. %s", ex.what());
             }
