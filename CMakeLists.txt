@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  geometry_msgs
   tf
   message_generation
 )
@@ -132,11 +133,11 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME}
-    src/model.cpp 
-  # src/${PROJECT_NAME}/libquirkd/view.cpp 
-  # src/${PROJECT_NAME}/libquirkd/controller.cpp 
-)
+# add_library(${PROJECT_NAME}
+#     src/model.cpp 
+#   # src/${PROJECT_NAME}/libquirkd/view.cpp 
+#   # src/${PROJECT_NAME}/libquirkd/controller.cpp 
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -148,10 +149,17 @@ add_library(${PROJECT_NAME}
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/quirkd_node.cpp)
 add_executable(
-    map_model src/map_model.cpp
+    DataController src/DataController.cpp
 )
 target_link_libraries(
-    map_model 
+    DataController
+    ${catkin_LIBRARIES}
+)
+add_executable(
+    UIManager src/UIManager.cpp
+)
+target_link_libraries(
+    UIManager
     ${catkin_LIBRARIES}
 )
 
