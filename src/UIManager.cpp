@@ -6,7 +6,9 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "UIManager");
     ROS_INFO("Init in UIManager");
     ros::NodeHandle n;
-    ros::Publisher polygonPub = n.advertise<geometry_msgs::PolygonStamped>("AlertViz", 1);
+    ros::Publisher lowPub = n.advertise<geometry_msgs::PolygonStamped>("/lowAlert", 1);
+    ros::Publisher warnPub = n.advertise<geometry_msgs::PolygonStamped>("/warnAlert", 1);
+    ros::Publisher maxPub = n.advertise<geometry_msgs::PolygonStamped>("/maxAlert", 1);
 
     geometry_msgs::PolygonStamped ps;
     ps.header.stamp = ros::Time::now();
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
 
     ros::Rate r(10);
     while (ros::ok()) {    
-        polygonPub.publish(ps);
+        maxPub.publish(ps);
         ROS_INFO("Publish ps");
         r.sleep();
         ROS_INFO("Rate sleep end");
