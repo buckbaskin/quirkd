@@ -8,6 +8,7 @@ from libquirkd.controller import DataController
 ALERT_PUB = rospy.Publisher('/quirkd/alert/notification', Alert, queue_size=10)
 
 def publish_alert(alert):
+    print('publish alert %s' % (alert,))
     ALERT_PUB.publish(alert)
 
 def handle_user_action(request):
@@ -52,3 +53,5 @@ if __name__ == '__main__':
         a.min_x = i * .1
         a.max_x = i * .1 + 2
         publish_alert(a)
+
+    rospy.spin()
