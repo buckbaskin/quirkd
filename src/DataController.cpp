@@ -1,7 +1,10 @@
 #include <ros/ros.h>
 
 #include <math.h>
+
+#include <cv_bridge/cv_bridge.h>
 #include <nav_msgs/GetMap.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <quirkd/Alert.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_listener.h>
@@ -31,13 +34,19 @@ class DataController {
         void update() {
             ROS_INFO("Update Data Processor");
             nav_msgs::GetMap srv;
+            cv_bridge::CvImagePtr static_image;
+            cv_bridge::CvImagePtr dynamic_image;
             if (static_map_client_.call(srv)) {
                 ROS_INFO("Successfull call static map");
+                nav_msgs::OccupancyGrid og = srv.response.map;
+                static_image = this -> gridToCvImage(&og);
             } else {
                 ROS_WARN("Failed to get static map");
             }
             if (dynamic_map_client_.call(srv)) {
                 ROS_INFO("Successfull call dynamic map");
+                nav_msgs::OccupancyGrid og = srv.response.map;
+                dynamic_image = this -> gridToCvImage(&og);
             } else {
                 ROS_WARN("Failed to get dynamic map");
             }
@@ -93,6 +102,10 @@ class DataController {
 
                 heading += scan_inc;
             }
+        }
+        cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
+            cv_bridge::CvImagePtr cv_ptr;
+            return cv_ptr;
         }
 };
 

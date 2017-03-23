@@ -6,14 +6,14 @@
 class UIManager {
     public:
         UIManager() {
-            ros::NodeHandle n;
-            lowPub = n.advertise<geometry_msgs::PolygonStamped>("/lowAlert", 1);
-            warnPub = n.advertise<geometry_msgs::PolygonStamped>("/warnAlert", 1);
-            maxPub = n.advertise<geometry_msgs::PolygonStamped>("/maxAlert", 1);
-            alertSub = n.subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
+            this->n = new ros::NodeHandle();
+            lowPub = this->n->advertise<geometry_msgs::PolygonStamped>("/lowAlert", 1);
+            warnPub = this->n->advertise<geometry_msgs::PolygonStamped>("/warnAlert", 1);
+            maxPub = this->n->advertise<geometry_msgs::PolygonStamped>("/maxAlert", 1);
+            alertSub = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
             ROS_INFO("Done with UIManager constructor");
         }
-        void alertCB(const quirkd::Alert alert) {
+        void alertCB(const quirkd::Alert& alert) {
             ROS_INFO("Alert CB");
             if (alert.level < 10) {
                 publishPolygon(&lowPub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
@@ -52,8 +52,12 @@ class UIManager {
 
             pub->publish(ps);
         }
+        int add1(int i) {
+            alertSub = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
+            return i + 1;
+        }
     private:
-        ros::NodeHandle n;
+        ros::NodeHandle* n;
         ros::Publisher lowPub;
         ros::Publisher warnPub;
         ros::Publisher maxPub;
@@ -64,5 +68,7 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "UIManager");
     ROS_INFO("Init in UIManager");
     UIManager ui;
+    ui.add1(2);
+    
     ros::spin();
 }
