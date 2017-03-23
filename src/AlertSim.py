@@ -27,12 +27,14 @@ if __name__ == '__main__':
     a.min_y = 0.0
     a.max_y = 2.0
 
+    r = rospy.Rate(2)
     for i in range(0, 30):
         a.header.stamp = rospy.Time.now()
         a.header.seq += 1
         a.min_x = i * .1
         a.max_x = i * .1 + 2
         publish_alert(a)
+        r.sleep()
 
     a.min_y = 0.1
     a.max_y = 2.1
@@ -43,15 +45,21 @@ if __name__ == '__main__':
         a.min_x = i * .1
         a.max_x = i * .1 + 2
         publish_alert(a)
+        r.sleep()
 
     a.min_y = 0.2
     a.max_y = 2.2
-    a.level = 20
+    a.level = 110
     for i in range(40, 45):
         a.header.stamp = rospy.Time.now()
         a.header.seq += 1
         a.min_x = i * .1
         a.max_x = i * .1 + 2
         publish_alert(a)
+        r.sleep()
 
+
+    while(not rospy.is_shutdown()):
+        publish_alert(a)
+        r.sleep()
     rospy.spin()
