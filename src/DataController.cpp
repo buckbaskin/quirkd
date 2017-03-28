@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 
+#include <stdint.h>
 #include <math.h>
 
 #include <cv_bridge/cv_bridge.h>
@@ -104,6 +105,46 @@ class DataController {
             }
         }
         cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
+            // Unpack the Occupancy Grid
+
+            nav_msgs::MapMetaData info = grid -> info;
+            float resolution = info.resolution;
+            int cell_width = info.width;
+            float map_width = cell_width * resolution;
+            int cell_height = info.height;
+            float map_height = cell_height * resolution;
+            // I'm assuming the map isn't rotated right now because that could be really complex
+            float origin_x = info.origin.position.x;
+            float origin_y = info.origin.position.x;
+            /*
+             * From documentation:
+             * The map data in row major order, starting at 0,0.
+             * Valid values are in the range [0, 100]
+             */
+            std::vector<int8_t> data = grid -> data;
+            std::vector<uint8_t> unsigned_data;
+            unsigned_data.resize(data.size()); // allocate and fill vector to match num elements of data
+
+            for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++) {
+                int8_t old_int = data[i];
+                // assume unknown values (signed -1) are just 0
+                // assumption is that unseen parts of the map have no obstacles until proven otherwise
+                uint8_t new_int = (uint8_t)((old_int == -1) ? 0 : old_int);
+                unsigned_data[(std::vector<uint8_t>::size_type) i] = new_int;
+            }
+
+            // Create the ROS Image Message
+
+            sensor_msgs::Image converted_image;
+            converted_image.width = cell_width;
+            converted_image.height = cell_height;
+            converted_image.encoding = sensor_msgs::image_encodings::MONO8;
+
+            converted_image.step = cell_width;
+            converted_image.data = unsigned_data;
+
+            // TODO use CV Bridge to get the CvImagePtr
+
             cv_bridge::CvImagePtr cv_ptr;
             return cv_ptr;
         }
