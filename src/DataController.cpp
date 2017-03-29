@@ -214,11 +214,6 @@ class DataController {
             int perim_width = (int) ((alert -> max_x - alert -> min_x) / resolution); // pixels
             int perim_height = (int) ((alert -> max_y - alert -> min_y) / resolution); // pixels
 
-            // for testing
-
-            perim_width = 10;
-            perim_height = 10;
-
             cv::Rect perimeter(p_cell_origin_x, p_cell_origin_y, perim_width, perim_height);
             ROS_DEBUG("perimeter x %d y %d w %d h %d", perimeter.x, perimeter.y, perimeter.width, perimeter.height);
 
