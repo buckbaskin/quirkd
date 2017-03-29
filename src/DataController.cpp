@@ -1,25 +1,32 @@
 #include <ros/ros.h>
 
-#include <stdint.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
 #include <nav_msgs/GetMap.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <opencv2/highgui/highgui.hpp>
 #include <quirkd/Alert.h>
 #include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/image_encodings.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 
 class DataController {
     public:
-        DataController() {
+        DataController() 
+            : it_(n_)
+        {
             alert_pub_ = n_.advertise<quirkd::Alert>("/quirkd/alert/notification", 1);
             laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
             // ros::service::waitForService("static_map");
             static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
             // ros::service::waitForService("dynamic_map");
             dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
+            image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
         }
         void laserScanCB(const sensor_msgs::LaserScan msg) {
             ROS_INFO("Laser Scan Callback");
@@ -41,6 +48,15 @@ class DataController {
                 ROS_INFO("Successfull call static map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
                 static_image = this -> gridToCvImage(&og);
+
+                // For testing
+
+                if (static_image -> image.rows > 60 && static_image -> image.cols>60) {
+                    cv::circle(static_image -> image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
+                }
+                ROS_INFO("Publish static image window");
+                image_pub_.publish(static_image->toImageMsg());
+                
             } else {
                 ROS_WARN("Failed to get static map");
             }
@@ -68,6 +84,8 @@ class DataController {
         tf::StampedTransform last_tf;
     private:
         ros::NodeHandle n_;
+        image_transport::ImageTransport it_;
+        image_transport::Publisher image_pub_;
         ros::Publisher alert_pub_;
         ros::Subscriber laser_sub_;
         ros::ServiceClient dynamic_map_client_;
@@ -169,7 +187,7 @@ int main(int argc, char** argv) {
     dp.update();
     while(ros::ok()) {
         ros::spinOnce();
-        if (dp.updated) {
+        if (dp.updated || true) {
             dp.update();
             ROS_INFO("Processed message data in loop");
         }
