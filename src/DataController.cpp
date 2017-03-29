@@ -40,6 +40,14 @@ class DataController {
             }
         }
         void update() {
+            quirkd::Alert alert;
+            alert.level = 0;
+            alert.min_x = 0;
+            alert.max_x = 1;
+            alert.min_y = 0;
+            alert.max_y = 1;
+            updateAlertPerimeter(&alert, last_data, last_tf);
+
             ROS_INFO("Update Data Processor");
             nav_msgs::GetMap srv;
             cv_bridge::CvImagePtr static_image;
@@ -47,7 +55,7 @@ class DataController {
             if (static_map_client_.call(srv)) {
                 ROS_INFO("Successfull call static map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
-                static_image = this -> gridToCvImage(&og);
+                static_image = this -> gridToCroppedCvImage(&og, &alert);
 
                 // For testing
 
@@ -63,10 +71,28 @@ class DataController {
             if (dynamic_map_client_.call(srv)) {
                 ROS_INFO("Successfull call dynamic map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
-                dynamic_image = this -> gridToCvImage(&og);
+                dynamic_image = this -> gridToCroppedCvImage(&og, &alert);
             } else {
                 ROS_WARN("Failed to get dynamic map");
+                dynamic_image = static_image;
             }
+
+            // two images (static (base) image and dynamic image)
+            // perimeter encoded as part of the alert and images aligned to alert perimeter
+
+            /* Compute difference
+             * Steps:
+             * - manhattan distance
+             */
+
+            // Manhattan Distance
+            cv::Mat absdiff;
+            cv::absdiff(static_image->image, dynamic_image->image, absdiff);
+            alert.level = cv::sum(absdiff)[0];
+
+            // TODO publish difference
+            ROS_INFO("The two images have a difference of %d", alert.level);
+
             updated = false;
         }
         void pub_alert_status() {
@@ -122,11 +148,11 @@ class DataController {
                 heading += scan_inc;
             }
         }
-        cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
+        cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert) {
             // Unpack the Occupancy Grid
 
             nav_msgs::MapMetaData info = grid -> info;
-            float resolution = info.resolution;
+            float resolution = info.resolution; // meters per pixel
             int cell_width = info.width;
             float map_width = cell_width * resolution;
             int cell_height = info.height;
@@ -161,7 +187,7 @@ class DataController {
             converted_image.step = cell_width;
             converted_image.data = unsigned_data;
 
-            // TODO use CV Bridge to get the CvImagePtr
+            // Use CV Bridge to get the CvImagePtr
 
             cv_bridge::CvImagePtr cv_ptr;
 
@@ -171,6 +197,43 @@ class DataController {
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }
 
+            // TODO cut down, shift images to align with perimeter from alert
+            /*
+             * Use the OpenCV cv::Rect intersection operator to find the
+             *  relevant intersection of the full image with the base image
+             *  Cut this out as a region of interest and paste it over the
+             *  black base image
+             * Return this image
+             */
+            int map_cell_origin_x = (int) (origin_x / resolution); // pixels
+            int map_cell_origin_y = (int) (origin_y / resolution); // pixels
+            
+            cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
+
+            int p_cell_origin_x = (int) (alert -> min_x / resolution); // pixels
+            int p_cell_origin_y = (int) (alert -> min_y / resolution); // pixels
+            int perim_width = (int) ((alert -> max_x - alert -> min_x) / resolution); // pixels
+            int perim_height = (int) ((alert -> max_y - alert -> min_y) / resolution); // pixels
+
+            cv::Rect perimeter(p_cell_origin_x, p_cell_origin_y, perim_width, perim_height);
+
+            cv::Rect intersect = map_region & perimeter;
+            // shift intersection to the coordinates of the cropped image
+            intersect.x -= map_cell_origin_x;
+            intersect.y -= map_cell_origin_y;
+
+            // this is the subset of the two images from the map that should be copied into the base
+            cv::Mat cropped_map = cv_ptr -> image(intersect);
+
+            cv::Mat base(perim_width, perim_height, CV_8UC1, cv::Scalar(0));
+            // shift intersection to the coordinates of the base image
+            intersect.x = intersect.x + map_cell_origin_x - p_cell_origin_x;
+            intersect.y = intersect.y + map_cell_origin_y - p_cell_origin_y;
+
+            // copy the map overlay to the base image
+            cropped_map.copyTo(base(intersect));
+
+            cv_ptr -> image = base;
             return cv_ptr;
         }
 };
