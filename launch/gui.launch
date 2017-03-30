@@ -1,0 +1,9 @@
+<launch>
+
+  <!-- Launch rviz -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quirkd)/rviz/UIConfig.rviz"/>
+
+  <node pkg="quirkd" name="UIManager" type="UIManager" output="screen">
+  </node>
+
+</launch>
