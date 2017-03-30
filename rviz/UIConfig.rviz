@@ -50,27 +50,27 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/Polygon
       Color: 25; 255; 0
-      Enabled: false
+      Enabled: true
       Name: LowAlert
       Topic: /lowAlert
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz/Polygon
       Color: 255; 85; 0
-      Enabled: false
+      Enabled: true
       Name: WarnAlert
       Topic: /warnAlert
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz/Polygon
       Color: 255; 0; 0
-      Enabled: false
+      Enabled: true
       Name: MaxAlert
       Topic: /maxAlert
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 0.7
       Class: rviz/Map
       Color Scheme: raw
@@ -174,11 +174,11 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: 25.5423
+      Scale: 23.0388
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 5.67653
-      Y: -1.39577
+      X: 5.42591
+      Y: -1.47181
     Saved: ~
 Window Geometry:
   Displays:

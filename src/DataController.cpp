@@ -135,8 +135,8 @@ class DataController {
             for (int i = 0; i < scan.ranges.size(); i++) {
                 double dist = scan.ranges[i];
                 
-                live_x = dist * sin(heading);
-                live_y = dist * cos(heading);
+                live_x = base_x + dist * cos(heading);
+                live_y = base_y + dist * sin(heading);
                 alert->min_x = std::min(live_x, double(alert->min_x));
                 alert->max_x = std::max(live_x, double(alert->max_x));
                 alert->min_y = std::min(live_y, double(alert->min_y));
@@ -144,10 +144,11 @@ class DataController {
 
                 heading += scan_inc;
             }
-            alert->min_x += -0.5;
-            alert->min_y += -0.5;
-            alert->max_x += 0.5;
-            alert->max_y += 0.5;
+            double padding = 0.5;
+            alert->min_x += -padding;
+            alert->min_y += -padding;
+            alert->max_x += padding;
+            alert->max_y += padding;
         }
         cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert) {
             // Unpack the Occupancy Grid
