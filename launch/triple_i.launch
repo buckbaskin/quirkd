@@ -9,6 +9,6 @@
   </node>
 
   <!-- Launch rviz -->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quirkd)/launch/sim.rviz"/>
+  <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quirkd)/launch/sim.rviz"/> -->
 
 </launch>
