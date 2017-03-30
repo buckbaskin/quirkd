@@ -58,10 +58,6 @@ class DataController {
                 nav_msgs::OccupancyGrid og = srv.response.map;
                 static_image = this->gridToCroppedCvImage(&og, &alert);
 
-                // For testing
-                if (static_image->image.rows > 60 && static_image->image.cols>60) {
-                    cv::circle(static_image->image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
-                }
                 static_image_pub_.publish(static_image->toImageMsg());
                 
             } else {
@@ -72,10 +68,6 @@ class DataController {
                 nav_msgs::OccupancyGrid og = srv.response.map;
                 dynamic_image = this->gridToCroppedCvImage(&og, &alert);
 
-                // For testing
-                if (dynamic_image->image.rows > 60 && dynamic_image->image.cols>60) {
-                    cv::circle(dynamic_image->image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
-                }
                 dynamic_image_pub_.publish(dynamic_image->toImageMsg());
             } else {
                 ROS_WARN("Failed to get dynamic map");
