@@ -97,18 +97,9 @@ class DataController {
 
             // TODO publish difference
             ROS_INFO("The two images have a difference of %d", alert.level);
+            alert_pub_.publish(alert);
 
             updated = false;
-        }
-        void pub_alert_status() {
-            quirkd::Alert alert;
-            alert.level = 0;
-            alert.min_x = 0;
-            alert.max_x = 1;
-            alert.min_y = 0;
-            alert.max_y = 1;
-            updateAlertPerimeter(&alert, last_data, last_tf);
-            alert_pub_.publish(alert);
         }
         bool updated;
         sensor_msgs::LaserScan last_data;
@@ -306,7 +297,7 @@ int main(int argc, char** argv) {
             dp.update();
             ROS_INFO("Processed message data in loop");
         }
-        dp.pub_alert_status();
+        // dp.pub_alert_status();
         r.sleep();
     }
     ROS_INFO("Data Processor Exited.");
