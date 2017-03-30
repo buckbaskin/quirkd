@@ -22,9 +22,11 @@ class DataController {
         {
             alert_pub_ = n_.advertise<quirkd::Alert>("/quirkd/alert/notification", 1);
             laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
-            // ros::service::waitForService("static_map");
+            ROS_INFO("WaitForService(\"static_map\");");
+            ros::service::waitForService("static_map");
             static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
-            // ros::service::waitForService("dynamic_map");
+            ROS_INFO("WaitForService(\"dynamic_map\");");
+            ros::service::waitForService("dynamic_map");
             dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
             static_image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
             dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
@@ -283,6 +285,7 @@ int main(int argc, char** argv) {
     DataController dp;
     dp.updated = false;
     ros::Rate r(30);
+
     dp.update();
     while(ros::ok()) {
         ros::spinOnce();
