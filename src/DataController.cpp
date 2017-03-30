@@ -55,11 +55,11 @@ class DataController {
             if (static_map_client_.call(srv)) {
                 ROS_INFO("Successfull call static map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
-                static_image = this -> gridToCroppedCvImage(&og, &alert);
+                static_image = this->gridToCroppedCvImage(&og, &alert);
 
                 // For testing
-                if (static_image -> image.rows > 60 && static_image -> image.cols>60) {
-                    cv::circle(static_image -> image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
+                if (static_image->image.rows > 60 && static_image->image.cols>60) {
+                    cv::circle(static_image->image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
                 }
                 image_pub_.publish(static_image->toImageMsg());
                 
@@ -69,7 +69,7 @@ class DataController {
             if (dynamic_map_client_.call(srv)) {
                 ROS_INFO("Successfull call dynamic map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
-                dynamic_image = this -> gridToCroppedCvImage(&og, &alert);
+                dynamic_image = this->gridToCroppedCvImage(&og, &alert);
             } else {
                 ROS_WARN("Failed to get dynamic map");
                 dynamic_image = static_image;
@@ -149,7 +149,7 @@ class DataController {
         cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert) {
             // Unpack the Occupancy Grid
 
-            nav_msgs::MapMetaData info = grid -> info;
+            nav_msgs::MapMetaData info = grid->info;
             float resolution = info.resolution; // meters per pixel
             int cell_width = info.width;
             float map_width = cell_width * resolution;
@@ -163,7 +163,7 @@ class DataController {
              * The map data in row major order, starting at 0,0.
              * Valid values are in the range [0, 100]
              */
-            std::vector<int8_t> data = grid -> data;
+            std::vector<int8_t> data = grid->data;
             std::vector<uint8_t> unsigned_data;
             unsigned_data.resize(data.size()); // allocate and fill vector to match num elements of data
 
@@ -207,30 +207,38 @@ class DataController {
             int map_cell_origin_y = (int) (origin_y / resolution); // pixels
             
             cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
-            ROS_DEBUG("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
+            ROS_INFO("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
 
-            int p_cell_origin_x = (int) (alert -> min_x / resolution); // pixels
-            int p_cell_origin_y = (int) (alert -> min_y / resolution); // pixels
-            int perim_width = (int) ((alert -> max_x - alert -> min_x) / resolution); // pixels
-            int perim_height = (int) ((alert -> max_y - alert -> min_y) / resolution); // pixels
+            int p_cell_origin_x = (int) (alert->min_x / resolution); // pixels
+            int p_cell_origin_y = (int) (alert->min_y / resolution); // pixels
+            int perim_width = (int) ((alert->max_x - alert->min_x) / resolution); // pixels
+            int perim_height = (int) ((alert->max_y - alert->min_y) / resolution); // pixels
 
             cv::Rect perimeter(p_cell_origin_x, p_cell_origin_y, perim_width, perim_height);
-            ROS_DEBUG("perimeter x %d y %d w %d h %d", perimeter.x, perimeter.y, perimeter.width, perimeter.height);
+            ROS_INFO("perimeter x %d y %d w %d h %d", perimeter.x, perimeter.y, perimeter.width, perimeter.height);
 
             cv::Rect intersect = map_region & perimeter;
 
-            ROS_DEBUG("I made my map rectangle");
+            ROS_INFO("I made my map rectangle");
 
             // shift intersection to the coordinates of the cropped image
             intersect.x -= map_cell_origin_x;
             intersect.y -= map_cell_origin_y;
 
-            ROS_DEBUG("shift intersect 1 x %d y %d w %d h %d", intersect.x, intersect.y, intersect.width, intersect.height);
+            ROS_INFO("shift intersect 1 x %d y %d w %d h %d", intersect.x, intersect.y, intersect.width, intersect.height);
 
+            // Assertion: 0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
+            ROS_INFO("conditions: %d %d %d %d %d %d",
+                0 <= intersect.x,
+                0 <= intersect.width,
+                intersect.x + intersect.width <= cv_ptr->image.cols,
+                0 <= intersect.y,
+                0 <= intersect.height,
+                intersect.y + intersect.height <= cv_ptr->image.rows);
             // this is the subset of the two images from the map that should be copied into the base
-            cv::Mat cropped_map = cv_ptr -> image(intersect);
+            cv::Mat cropped_map = cv_ptr->image(intersect);
 
-            ROS_DEBUG("cropped map");
+            ROS_INFO("cropped map");
 
             cv::Mat base(perim_width, perim_height, CV_8UC1, cv::Scalar(0));
             // shift intersection to the coordinates of the base image
@@ -251,7 +259,7 @@ class DataController {
                 ROS_DEBUG("No overlay (no area)");
             }
 
-            cv_ptr -> image = base;
+            cv_ptr->image = base;
             return cv_ptr;
         }
 };
