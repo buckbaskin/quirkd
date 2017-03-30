@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="quirkd" name="DataController" type="DataController" output="screen" args="--debug">
+    </node>
+</launch>
