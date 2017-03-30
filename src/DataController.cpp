@@ -207,29 +207,29 @@ class DataController {
             int map_cell_origin_y = (int) (origin_y / resolution); // pixels
             
             cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
-            ROS_INFO("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
+            ROS_DEBUG("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
 
             int p_cell_origin_x = (int) (alert->min_x / resolution); // pixels
             int p_cell_origin_y = (int) (alert->min_y / resolution); // pixels
             int perim_width = (int) ((alert->max_x - alert->min_x) / resolution); // pixels
             int perim_height = (int) ((alert->max_y - alert->min_y) / resolution); // pixels
-            ROS_INFO("perim w: %d h: %d", perim_width, perim_height);
+            ROS_DEBUG("perim w: %d h: %d", perim_width, perim_height);
 
             cv::Rect perimeter(p_cell_origin_x, p_cell_origin_y, perim_width, perim_height);
-            ROS_INFO("perimeter x %d y %d w %d h %d", perimeter.x, perimeter.y, perimeter.width, perimeter.height);
+            ROS_DEBUG("perimeter x %d y %d w %d h %d", perimeter.x, perimeter.y, perimeter.width, perimeter.height);
 
             cv::Rect intersect = map_region & perimeter;
 
-            ROS_INFO("I made my map rectangle");
+            ROS_DEBUG("I made my map rectangle");
 
             // shift intersection to the coordinates of the cropped image
             intersect.x -= map_cell_origin_x;
             intersect.y -= map_cell_origin_y;
 
-            ROS_INFO("shift intersect 1 x %d y %d w %d h %d", intersect.x, intersect.y, intersect.width, intersect.height);
+            ROS_DEBUG("shift intersect 1 x %d y %d w %d h %d", intersect.x, intersect.y, intersect.width, intersect.height);
 
             // Assertion: 0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
-            ROS_INFO("conditions 1: %d %d %d %d %d %d",
+            ROS_DEBUG("conditions 1: %d %d %d %d %d %d",
                 0 <= intersect.x,
                 0 <= intersect.width,
                 intersect.x + intersect.width <= cv_ptr->image.cols,
@@ -239,25 +239,25 @@ class DataController {
             // this is the subset of the two images from the map that should be copied into the base
             cv::Mat cropped_map = cv_ptr->image(intersect);
 
-            ROS_INFO("cropped map");
+            ROS_DEBUG("cropped map");
 
             cv::Mat base(perim_height, perim_width, CV_8UC1, cv::Scalar(0));
             // shift intersection to the coordinates of the base image
             intersect.x = intersect.x + map_cell_origin_x - p_cell_origin_x;
             intersect.y = intersect.y + map_cell_origin_y - p_cell_origin_y;
             
-            ROS_INFO("shift intersect 2 x %d y %d w %d h %d", intersect.x, intersect.y, intersect.width, intersect.height);
-            ROS_INFO("base_info x 0 y 0 w %d h %d", base.cols, base.rows);
+            ROS_DEBUG("shift intersect 2 x %d y %d w %d h %d", intersect.x, intersect.y, intersect.width, intersect.height);
+            ROS_DEBUG("base_info x 0 y 0 w %d h %d", base.cols, base.rows);
 
             // Assertion: 0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
-            ROS_INFO("conditions 2: %d %d %d %d %d %d",
+            ROS_DEBUG("conditions 2: %d %d %d %d %d %d",
                 0 <= intersect.x,
                 0 <= intersect.width,
                 intersect.x + intersect.width <= base.cols,
                 0 <= intersect.y,
                 0 <= intersect.height,
                 intersect.y + intersect.height <= base.rows);
-            ROS_INFO("conditions 2.1:\n0 <= %d\n0 <= %d\n%d <= %d\n0 <= %d\n0 <= %d\n%d <= %d",
+            ROS_DEBUG("conditions 2.1:\n0 <= %d\n0 <= %d\n%d <= %d\n0 <= %d\n0 <= %d\n%d <= %d",
                 intersect.x,
                 intersect.width,
                 intersect.x + intersect.width, base.cols,
@@ -267,14 +267,14 @@ class DataController {
             
             cv::Mat base_roi(base, intersect);
 
-            ROS_INFO("shift intersect 2");
+            ROS_DEBUG("shift intersect 2");
 
             // copy the map overlay to the base image
             if (intersect.area() > 0) {
                 cropped_map.copyTo(base_roi);
-                ROS_INFO("Overlay done");
+                ROS_DEBUG("Overlay done");
             } else {
-                ROS_INFO("No overlay (no area)");
+                ROS_DEBUG("No overlay (no area)");
             }
 
             cv_ptr->image = base;
