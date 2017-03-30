@@ -1,0 +1,22 @@
+<launch>
+
+  <!-- Create a static transfrom from map to odom. In the future this will be updated by the localization node. -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="2 2 0 1.57079632679 0 0 map odom"/>
+
+  <!-- Launch stage with the specified world file-->
+  <node pkg="stage_ros" type="stageros" name="stage" args="$(find quirkd)/world/figure_eight.world">
+    <remap from="base_pose_ground_truth" to="odom_map"/>
+  </node>
+
+  <!-- Launch the sensor_sim node -->
+  <node pkg="snowmower_sim" type="sensor_sim" name="sensor_sim" output="screen">
+    <!-- Beacon Location x-y [x1, y1, x2, y2, x3, y3, x4, y4] -->
+    <rosparam param="DW_Beacon_Loc">[0.0, 0.0, 8.0, 0.0, 8.0, 6.0, 0.0, 6.0]</rosparam>
+    <!-- Then load the rest of the common paramters -->
+    <rosparam command="load" file="$(find quirkd)/launch/sim_params.yaml"/>
+  </node>
+
+  <!-- Launch rviz -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quirkd)/launch/figure_eight.rviz"/>
+
+</launch>

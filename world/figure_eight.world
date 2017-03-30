@@ -1,0 +1,109 @@
+define block model
+(
+  shape "circle"
+  size [0.1 0.1 0.5]
+  gui_nose 0
+)
+
+define star model
+(
+  bitmap "../bitmaps/star.bmp"
+  size [1 1 1]
+  color "orange"
+)
+
+define pentagon_sm model
+(
+  size [1.9022 1.8090 1.0000]
+  block
+  (
+    points 5
+    point[0] [ 0.0000  1.0000]
+    point[1] [-0.9511 -0.3090]
+    point[2] [-0.5878 -0.8090]
+    point[3] [ 0.5878 -0.8090]
+    point[4] [ 0.9511  0.3090]
+    z [0 1]
+  )
+  # polygons 1
+  # polygon[0].points 5
+  # polygon[0].points[0] [0 0]
+  # polygon[0].points[1] [1 0]
+  # polygon[0].points[2] [1.5 1]
+  # polygon[0].points[3] [0 1.5]
+  # polygon[0].points[4] [-0.5 1] 
+
+  # size [1 1 1]
+  # line_count 5
+  # line[0] [x1: 0.0000 y1: 1.0000 x2:-0.9511 y2: 0.3090]
+  # line[1] [x1:-0.9511 y1: 0.3090 x2:-0.5878 y2:-0.8090]
+  # line[2] [x1:-0.5878 y1:-0.8090 x2: 0.5878 y2:-0.8090]
+  # line[3] [x1: 0.5878 y1:-0.8090 x2: 0.9511 y2: 0.3090]
+  # line[4] [x1: 0.9511 y1: 0.3090 x2: 0.0000 y2: 1.0000]
+
+  gui_nose 0
+  ranger_return 1
+)
+
+define topurg ranger
+(
+  sensor( 			
+    range [ 0.0  30.0 ]
+    fov 180
+   samples 181
+  )
+
+  # generic model properties
+  color "black"
+  size [ 0.05 0.05 0.1 ]
+)
+
+define erratic position
+(
+  size [0.35 0.35 0.25]
+  origin [-0.05 0 0 0]
+  gui_nose 1
+  drive "diff"
+  topurg(pose [ 0.050 0.000 0 0.000 ])
+)
+
+define floorplan model
+(
+  # sombre, sensible, artistic
+  color "gray30"
+
+  # most maps will need a bounding box
+  boundary 0
+
+  gui_nose 0
+  gui_grid 0
+
+  gui_outline 0
+  gripper_return 0
+  fiducial_return 0
+  laser_return 0
+)
+
+# set the resolution of the underlying raytrace model in meters
+resolution 0.02
+
+interval_sim 100  # simulation timestep in milliseconds
+
+
+window
+( 
+  size [ 366.67  633.33 ] 
+
+  rotate [ 0.000 0.000 ]
+  scale 28.806 
+)
+
+
+# throw in a robot
+erratic( pose [ 4.0 2.0 0.0 270 ] name "era" color "blue")
+# and some obstacles
+block( pose [ 0 -1.0 0.0 0.0 ] color "red")
+block( pose [ 0 -1.5 0.0 0.0 ] color "red")
+pentagon_sm( pose [ 1.0 1.0 0.0 0.0 ] color "red")
+
+star( pose [ 2 2 0 0 ] )
