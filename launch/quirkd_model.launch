@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="map_server" name="staticMapModel" type="map_server" output="screen" args="$(find quirkd)/maps/tripleI.yaml map:=static_map" respawn="true" >
+    <node pkg="map_server" name="staticMapModel" type="map_server" output="screen" args="$(find quirkd)/maps/test_sim.yaml map:=static_map" respawn="true" >
     </node>
 </launch>
