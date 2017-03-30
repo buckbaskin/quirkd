@@ -26,7 +26,8 @@ class DataController {
             static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
             // ros::service::waitForService("dynamic_map");
             dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
-            image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
+            static_image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
+            dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
         }
         void laserScanCB(const sensor_msgs::LaserScan msg) {
             ROS_INFO("Laser Scan Callback");
@@ -61,7 +62,7 @@ class DataController {
                 if (static_image->image.rows > 60 && static_image->image.cols>60) {
                     cv::circle(static_image->image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
                 }
-                image_pub_.publish(static_image->toImageMsg());
+                static_image_pub_.publish(static_image->toImageMsg());
                 
             } else {
                 ROS_WARN("Failed to get static map");
@@ -70,6 +71,12 @@ class DataController {
                 ROS_INFO("Successfull call dynamic map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
                 dynamic_image = this->gridToCroppedCvImage(&og, &alert);
+
+                // For testing
+                if (dynamic_image->image.rows > 60 && dynamic_image->image.cols>60) {
+                    cv::circle(dynamic_image->image, cv::Point(50,50), 10, CV_RGB(100,100,100), -1);
+                }
+                dynamic_image_pub_.publish(dynamic_image->toImageMsg());
             } else {
                 ROS_WARN("Failed to get dynamic map");
                 dynamic_image = static_image;
@@ -109,7 +116,8 @@ class DataController {
     private:
         ros::NodeHandle n_;
         image_transport::ImageTransport it_;
-        image_transport::Publisher image_pub_;
+        image_transport::Publisher static_image_pub_;
+        image_transport::Publisher dynamic_image_pub_;
         ros::Publisher alert_pub_;
         ros::Subscriber laser_sub_;
         ros::ServiceClient dynamic_map_client_;
@@ -145,6 +153,10 @@ class DataController {
 
                 heading += scan_inc;
             }
+            alert->min_x += -0.5;
+            alert->min_y += -0.5;
+            alert->max_x += 0.5;
+            alert->max_y += 0.5;
         }
         cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert) {
             // Unpack the Occupancy Grid
