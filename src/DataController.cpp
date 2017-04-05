@@ -30,6 +30,7 @@ class DataController {
             dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
             static_image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
             dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
+            heatmap_pub_ = it_.advertise("/quirkd/test/heatmap", 1);
         }
         void laserScanCB(const sensor_msgs::LaserScan msg) {
             ROS_INFO("Laser Scan Callback");
@@ -87,6 +88,22 @@ class DataController {
             // Manhattan Distance
             cv::Mat absdiff;
             cv::absdiff(static_image->image, dynamic_image->image, absdiff);
+
+            // use absdiff as a mask to visualize difference with "heatmap" (bgr)
+            cv::Mat redBase(static_image->image.rows, static_image->image.cols, CV_8UC3, cv::Scalar(0, 0, 255));
+            cv::Mat byChannel[3];
+            cv::split(redBase, byChannel);
+            // byChannel[2] = absdiff;
+            cv::merge(byChannel, 3, redBase);
+            ROS_INFO("Split and merge done");
+            cv_bridge::CvImagePtr heatmap;
+            ROS_INFO("Create heatmap");
+            // problem in this step
+            heatmap->image = redBase; 
+            ROS_INFO("Add redBase");
+            heatmap_pub_.publish(heatmap->toImageMsg());
+            ROS_INFO("publish heatmap");
+
             alert.level = cv::sum(absdiff)[0];
 
             // TODO publish difference
@@ -103,6 +120,7 @@ class DataController {
         image_transport::ImageTransport it_;
         image_transport::Publisher static_image_pub_;
         image_transport::Publisher dynamic_image_pub_;
+        image_transport::Publisher heatmap_pub_;
         ros::Publisher alert_pub_;
         ros::Subscriber laser_sub_;
         ros::ServiceClient dynamic_map_client_;
