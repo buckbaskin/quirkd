@@ -95,13 +95,19 @@ class DataController {
             cv::split(redBase, byChannel);
             // byChannel[2] = absdiff;
             cv::merge(byChannel, 3, redBase);
+
             ROS_INFO("Split and merge done");
-            cv_bridge::CvImagePtr heatmap;
+            // cv_bridge::CvImage heatmap(header, sensor_msgs::image_encodings::BGR8, byChannel);
+            cv_bridge::CvImage heatmap;
             ROS_INFO("Create heatmap");
+            heatmap.header = static_image->header;
+            ROS_INFO("Add header");
+            heatmap.encoding = sensor_msgs::image_encodings::TYPE_8UC3;
             // problem in this step
-            heatmap->image = redBase; 
-            ROS_INFO("Add redBase");
-            heatmap_pub_.publish(heatmap->toImageMsg());
+            ROS_INFO("set encoding");
+            heatmap.image = redBase; 
+            ROS_INFO("set image done redBase");
+            heatmap_pub_.publish(heatmap.toImageMsg());
             ROS_INFO("publish heatmap");
 
             alert.level = cv::sum(absdiff)[0];
