@@ -37,6 +37,8 @@ class DataController {
             updated = true;
             last_data = msg;
             try {
+                ROS_INFO("Waiting for transform");
+                tf_.waitForTransform("/map", "/base_laser_link", ros::Time(0), ros::Duration(3.0));
                 tf_.lookupTransform("/map", "/base_laser_link", ros::Time(0), last_tf);
                 ROS_INFO("tf success for /map to /base_laser_link");
             } catch (tf::TransformException &ex) {
@@ -86,8 +88,12 @@ class DataController {
              */
 
             // Manhattan Distance
+            cv::Mat blurryStatic;
+            cv::Mat blurryDynamic;
+            cv::blur(static_image->image, blurryStatic, cv::Size(5, 5));
+            cv::blur(dynamic_image->image, blurryDynamic, cv::Size(5, 5));
             cv::Mat absdiff;
-            cv::absdiff(static_image->image, dynamic_image->image, absdiff);
+            cv::absdiff(blurryStatic, blurryDynamic, absdiff);
             cv::convertScaleAbs(absdiff, absdiff, 2.55, 0.0);
             ROS_INFO("Scale by 2.55");
 
@@ -100,8 +106,9 @@ class DataController {
 
             cv_bridge::CvImage heatmap;
             heatmap.header = static_image->header;
-            heatmap.encoding = sensor_msgs::image_encodings::TYPE_8UC3;
+            heatmap.encoding = sensor_msgs::image_encodings::BGR8;
             heatmap.image = redBase;
+            ROS_INFO("publish heatmap part 2");
             heatmap_pub_.publish(heatmap.toImageMsg());
             
             alert.level = cv::sum(absdiff)[0];
