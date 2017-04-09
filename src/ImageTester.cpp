@@ -49,11 +49,6 @@ class ImageTester {
             //     warp_mode,
             //     criteria
             //     );
-            cv::imshow("Static Map", *static_image);
-            cv::imshow("Dynamic Map", *dynamic_image);
-            cv::warpAffine(*dynamic_image, *dynamic_image, warp_matrix, static_image->size(), cv::INTER_LINEAR + cv::WARP_INVERSE_MAP);
-            cv::imshow("Adjusted Dynamic Map", *dynamic_image);
-            cv::waitKey(0);
         }
         int quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
             cv::Mat absdiff;
@@ -72,6 +67,7 @@ class ImageTester {
             heatmap.image = redBase;
             ROS_INFO("publish heatmap");
             heatmap_pub_.publish(heatmap.toImageMsg());
+            cv::imshow("Absdiff", absdiff);
 
             // return sum of the absdiff
             return cv::sum(absdiff)[0];
@@ -87,7 +83,11 @@ class ImageTester {
 
             // Manhattan Distance
             this->preprocessImages(&(static_image.image), &(dynamic_image.image));
-            return this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
+            cv::imshow("Static Map", static_image.image);
+            cv::imshow("Dynamic Map", dynamic_image.image);
+            int result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
+            cv::waitKey(0);
+            return result;
         }
     private:
         ros::NodeHandle n_;
