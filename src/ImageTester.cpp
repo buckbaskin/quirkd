@@ -25,30 +25,12 @@ class ImageTester {
             heatmap_pub_ = it_.advertise("/quirkd/test/heatmap", 1);
         }
         void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image) {
-            // cv::Mat blurryStatic;
-            // cv::Mat blurryDynamic;
-            // cv::blur(static_image->image, blurryStatic, cv::Size(5, 5));
-            // cv::blur(dynamic_image->image, blurryDynamic, cv::Size(5, 5));
-            // static_image->image = blurryStatic;
-            // dynamic_image->image = blurryDynamic;
-
-            // const int warp_mode = cv::MOTION_EUCLIDEAN;
-            const int warp_mode = 1;
-            cv::Mat warp_matrix = cv::Mat::eye(2, 3, CV_32F);
-            int number_of_iterations = 5000;
-            double termination_eps = 1e-10;
-            cv::TermCriteria criteria (cv::TermCriteria::COUNT + cv::TermCriteria::EPS, number_of_iterations, termination_eps);
-            int version = CV_MAJOR_VERSION;
-            int version2 = CV_MINOR_VERSION;
-            ROS_INFO("CV Version %d.%d", version, version2);
-            // Available in OpenCV 3
-            // cv::findTransformECC(
-            //     static_image->image,
-            //     dynamic_image->image,
-            //     warp_matrix,
-            //     warp_mode,
-            //     criteria
-            //     );
+            cv::Mat blurryStatic;
+            cv::Mat blurryDynamic;
+            cv::blur(*static_image, blurryStatic, cv::Size(5, 5));
+            cv::blur(*dynamic_image, blurryDynamic, cv::Size(5, 5));
+            *static_image = blurryStatic;
+            *dynamic_image = blurryDynamic;
         }
         int quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
             cv::Mat absdiff;
