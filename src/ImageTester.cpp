@@ -24,13 +24,36 @@ class ImageTester {
             dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
             heatmap_pub_ = it_.advertise("/quirkd/test/heatmap", 1);
         }
-        void preprocessImages(cv_bridge::CvImage* static_image, cv_bridge::CvImage* dynamic_image) {
+        void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image) {
             // cv::Mat blurryStatic;
             // cv::Mat blurryDynamic;
             // cv::blur(static_image->image, blurryStatic, cv::Size(5, 5));
             // cv::blur(dynamic_image->image, blurryDynamic, cv::Size(5, 5));
             // static_image->image = blurryStatic;
             // dynamic_image->image = blurryDynamic;
+
+            // const int warp_mode = cv::MOTION_EUCLIDEAN;
+            const int warp_mode = 1;
+            cv::Mat warp_matrix = cv::Mat::eye(2, 3, CV_32F);
+            int number_of_iterations = 5000;
+            double termination_eps = 1e-10;
+            cv::TermCriteria criteria (cv::TermCriteria::COUNT + cv::TermCriteria::EPS, number_of_iterations, termination_eps);
+            int version = CV_MAJOR_VERSION;
+            int version2 = CV_MINOR_VERSION;
+            ROS_INFO("CV Version %d.%d", version, version2);
+            // Available in OpenCV 3
+            // cv::findTransformECC(
+            //     static_image->image,
+            //     dynamic_image->image,
+            //     warp_matrix,
+            //     warp_mode,
+            //     criteria
+            //     );
+            cv::imshow("Static Map", *static_image);
+            cv::imshow("Dynamic Map", *dynamic_image);
+            cv::warpAffine(*dynamic_image, *dynamic_image, warp_matrix, static_image->size(), cv::INTER_LINEAR + cv::WARP_INVERSE_MAP);
+            cv::imshow("Adjusted Dynamic Map", *dynamic_image);
+            cv::waitKey(0);
         }
         int quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
             cv::Mat absdiff;
@@ -51,7 +74,7 @@ class ImageTester {
             heatmap_pub_.publish(heatmap.toImageMsg());
 
             // return sum of the absdiff
-            return 0;
+            return cv::sum(absdiff)[0];
         }
         int measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image) {
             // two images (static (base) image and dynamic image)
@@ -63,11 +86,8 @@ class ImageTester {
              */
 
             // Manhattan Distance
-            cv::Mat blurryStatic;
-            cv::Mat blurryDynamic;
-            cv::blur(static_image.image, blurryStatic, cv::Size(5, 5));
-            cv::blur(dynamic_image.image, blurryDynamic, cv::Size(5, 5));
-            return this->quantifyDifference(&blurryStatic, &blurryDynamic);
+            this->preprocessImages(&(static_image.image), &(dynamic_image.image));
+            return this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
         }
     private:
         ros::NodeHandle n_;
