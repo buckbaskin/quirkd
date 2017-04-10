@@ -29,10 +29,27 @@ class ImageTester {
             cv::Mat blurryDynamic;
             cv::blur(*static_image, blurryStatic, cv::Size(5, 5));
             cv::blur(*dynamic_image, blurryDynamic, cv::Size(5, 5));
-            *static_image = blurryStatic;
-            *dynamic_image = blurryDynamic;
+            // *static_image = blurryStatic;
+            // *dynamic_image = blurryDynamic;
         }
         int quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
+            // src = static_processed
+
+            cv::imshow("source", *static_processed);
+            cv::Mat dst, cdst;
+            cv::Canny(*static_processed, dst, 50, 200, 3); // TODO check these parameters
+            cv::imshow("dst after Canny", dst);
+            cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+            std::vector<cv::Vec4i> lines;
+            cv::HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10); // TODO check these parameters
+            for( size_t i = 0; i < lines.size(); i++ ) {
+                cv::Vec4i l = lines[i];
+                cv::line( cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
+            }
+            cv::imshow("detected lines", cdst);
+            cv::waitKey(0);
+
+            // OLD VERSION
             cv::Mat absdiff;
             cv::absdiff(*static_processed, *dynamic_processed, absdiff);
             cv::convertScaleAbs(absdiff, absdiff, 2.55, 0.0);
