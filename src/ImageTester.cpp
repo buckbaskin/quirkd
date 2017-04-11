@@ -23,27 +23,14 @@ class ImageTester {
         {
             static_image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
             dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
-            heatmap_pub_ = it_.advertise("/quirkd/test/heatmap", 1);
+            visualization_pub_ = it_.advertise("/quirkd/test/visualization_image", 1);
         }
         void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image) {
-            cv::Mat blurryStatic;
-            cv::Mat blurryDynamic;
-            cv::blur(*static_image, blurryStatic, cv::Size(5, 5));
-            cv::blur(*dynamic_image, blurryDynamic, cv::Size(5, 5));
-            // *static_image = blurryStatic;
-            // *dynamic_image = blurryDynamic;
         }
         int quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
-            // src = static_processed
-
-            ROS_INFO("src size %d x %d", (*static_processed).cols, (*static_processed).rows);
-            // cv::imshow("source", *static_processed);
             cv::Mat static_edges, dynamic_edges, static_cdst, dynamic_cdst, unmatched_cdst;
             cv::Canny(*static_processed, static_edges, 50, 200, 3); // TODO check these parameters
             cv::Canny(*dynamic_processed, dynamic_edges, 50, 200, 3);
-
-            // cv::imshow("static_edges after Canny", static_edges);
-            // cv::imshow("dynamic_edges after Canny", dynamic_edges);
 
             cv::cvtColor(static_edges, static_cdst, CV_GRAY2BGR);
             cv::cvtColor(dynamic_edges, dynamic_cdst, CV_GRAY2BGR);
@@ -70,41 +57,34 @@ class ImageTester {
             cv::imshow("static detected", static_cdst);
             cv::imshow("dynamic detected", dynamic_cdst);
 
+            double unmatched_quantifier = 0.0;
+
             // find unmatched dynamic lines (red)
             std::vector<cv::Vec4i> unmatched_lines = this->filterEdgesByMatching(static_lines, dynamic_lines);
             for( size_t i = 0; i < unmatched_lines.size(); i++ ) {
                 cv::Vec4i l = unmatched_lines[i];
                 cv::line( unmatched_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
+                unmatched_quantifier += this->distance_measure(l[0], l[1], l[2], l[3]);
             }
             // find unmatched static lines (red)
             unmatched_lines = this->filterEdgesByMatching(dynamic_lines, static_lines);
             for( size_t i = 0; i < unmatched_lines.size(); i++ ) {
                 cv::Vec4i l = unmatched_lines[i];
                 cv::line( unmatched_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,255,0), 2, CV_AA);
+                unmatched_quantifier += this->distance_measure(l[0], l[1], l[2], l[3]);
             }
             cv::imshow("unmatched", unmatched_cdst);
 
-            // OLD VERSION
-            cv::Mat absdiff;
-            cv::absdiff(*static_processed, *dynamic_processed, absdiff);
-            cv::convertScaleAbs(absdiff, absdiff, 2.55, 0.0);
+            int alert_level = (int) (unmatched_quantifier);
+
+            cv_bridge::CvImage anomaly_visualization;
+            anomaly_visualization.encoding = sensor_msgs::image_encodings::BGR8;
+            anomaly_visualization.image = unmatched_cdst;
+            ROS_INFO("publish visualization");
+            visualization_pub_.publish(anomaly_visualization.toImageMsg());
             
-            // use absdiff as a mask to visualize difference with "heatmap" (bgr)
-            cv::Mat redBase(static_processed->rows, static_processed->cols, CV_8UC3, cv::Scalar(0, 0, 255));
-            cv::Mat byChannel[3];
-            cv::split(redBase, byChannel);
-            byChannel[2] = absdiff;
-            cv::merge(byChannel, 3, redBase);
-
-            cv_bridge::CvImage heatmap;
-            heatmap.encoding = sensor_msgs::image_encodings::BGR8;
-            heatmap.image = redBase;
-            ROS_INFO("publish heatmap");
-            heatmap_pub_.publish(heatmap.toImageMsg());
-            // cv::imshow("Absdiff", absdiff);
-
             // return sum of the absdiff
-            return cv::sum(absdiff)[0];
+            return alert_level;
         }
         std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges) {
             std::vector<cv::Vec4i> unmatched_set;
@@ -146,12 +126,7 @@ class ImageTester {
             return unmatched_set;
         }
         int measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image) {
-            ROS_INFO("static map original size %d x %d", static_image.image.cols, static_image.image.rows);
             this->preprocessImages(&(static_image.image), &(dynamic_image.image));
-            ROS_INFO("static map size %d x %d", static_image.image.cols, static_image.image.rows);
-            // cv::imshow("Static Map", static_image.image);
-            ROS_INFO("dynamic map size %d x %d", dynamic_image.image.cols, dynamic_image.image.rows);
-            // cv::imshow("Dynamic Map", dynamic_image.image);
             int result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
             cv::waitKey(0);
             return result;
@@ -161,7 +136,7 @@ class ImageTester {
         image_transport::ImageTransport it_;
         image_transport::Publisher static_image_pub_;
         image_transport::Publisher dynamic_image_pub_;
-        image_transport::Publisher heatmap_pub_;
+        image_transport::Publisher visualization_pub_;
         double distance_measure(int start_x, int start_y, int end_x, int end_y) {
             return pow(start_x - end_x, 2) + pow(start_y - end_y, 2);
         }
@@ -184,5 +159,7 @@ int main(int argc, char** argv) {
     int result = it.measureDifference(image1, image2);
 
     ROS_INFO("ImageTester Exited. Image diff of %d", result);
+    for (int i = 0; i < 10000; ++i)
+    {}
     return 0;
 }
