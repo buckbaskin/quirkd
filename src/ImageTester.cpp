@@ -38,15 +38,16 @@ class ImageTester {
 
             ROS_INFO("src size %d x %d", (*static_processed).cols, (*static_processed).rows);
             // cv::imshow("source", *static_processed);
-            cv::Mat static_edges, dynamic_edges, static_cdst, dynamic_cdst;
+            cv::Mat static_edges, dynamic_edges, static_cdst, dynamic_cdst, unmatched_cdst;
             cv::Canny(*static_processed, static_edges, 50, 200, 3); // TODO check these parameters
             cv::Canny(*dynamic_processed, dynamic_edges, 50, 200, 3);
 
-            cv::imshow("static_edges after Canny", static_edges);
-            cv::imshow("dynamic_edges after Canny", dynamic_edges);
+            // cv::imshow("static_edges after Canny", static_edges);
+            // cv::imshow("dynamic_edges after Canny", dynamic_edges);
 
             cv::cvtColor(static_edges, static_cdst, CV_GRAY2BGR);
             cv::cvtColor(dynamic_edges, dynamic_cdst, CV_GRAY2BGR);
+            cv::cvtColor(dynamic_edges, unmatched_cdst, CV_GRAY2BGR);
             
             // Hough Parameters
             std::vector<cv::Vec4i> static_lines, dynamic_lines;
@@ -55,8 +56,7 @@ class ImageTester {
             const int min_line_length = 8;
             const int threshold = min_line_length; // number of interesections to make a line
             const int max_line_gap = min_line_length - 2; // largest gap (in pixels) considered on the same line
-            std::string stitle = "detected lines ";
-
+            
             cv::HoughLinesP(static_edges, static_lines, radius_resolution, theta_resolution, threshold, min_line_length, max_line_gap);
             for( size_t i = 0; i < static_lines.size(); i++ ) {
                 cv::Vec4i l = static_lines[i];
@@ -67,11 +67,22 @@ class ImageTester {
                 cv::Vec4i l = dynamic_lines[i];
                 cv::line( dynamic_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
             }
-            std::ostringstream title;
-            title << stitle << min_line_length;
             cv::imshow("static detected", static_cdst);
             cv::imshow("dynamic detected", dynamic_cdst);
-            
+
+            // find unmatched dynamic lines (red)
+            std::vector<cv::Vec4i> unmatched_lines = this->filterEdgesByMatching(static_lines, dynamic_lines);
+            for( size_t i = 0; i < unmatched_lines.size(); i++ ) {
+                cv::Vec4i l = unmatched_lines[i];
+                cv::line( unmatched_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
+            }
+            // find unmatched static lines (red)
+            unmatched_lines = this->filterEdgesByMatching(dynamic_lines, static_lines);
+            for( size_t i = 0; i < unmatched_lines.size(); i++ ) {
+                cv::Vec4i l = unmatched_lines[i];
+                cv::line( unmatched_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,255,0), 2, CV_AA);
+            }
+            cv::imshow("unmatched", unmatched_cdst);
 
             // OLD VERSION
             cv::Mat absdiff;
@@ -95,13 +106,52 @@ class ImageTester {
             // return sum of the absdiff
             return cv::sum(absdiff)[0];
         }
+        std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges) {
+            std::vector<cv::Vec4i> unmatched_set;
+            const double limit = 1000;
+            for( size_t i = 0; i < new_edges.size(); i++ ) { // for each edge in the new edges
+                cv::Vec4i seeker = new_edges[i];
+                bool matched = false;
+                double min_best = 10000000;
+                for( size_t i = 0; i < original.size(); i++ ) { // check each of the original edges
+                    cv::Vec4i candidate = original[i];
+                    // for the beginning and end of the seeker line, check the distance to the candidate endpoints
+                    // take the orientation with the best overall score
+                    // if it beats (smaller than) the existing best match, update the params
+
+                    // front to front
+                    double forward_front = this->distance_measure(seeker[0], seeker[1], candidate[0], candidate[1]);
+                    double forward_back = this->distance_measure(seeker[2], seeker[3], candidate[2], candidate[3]);
+                    if (forward_front < limit/2 && forward_back < limit/2 && forward_back + forward_front < limit/2) {
+                        matched = true;
+                        break;
+                    }
+                    min_best = std::min(min_best, forward_front + forward_back);
+                    double reverse_front = this->distance_measure(seeker[0], seeker[1], candidate[2], candidate[3]);
+                    double reverse_back = this->distance_measure(seeker[2], seeker[3], candidate[0], candidate[1]);
+                    if (reverse_front < limit/2 && reverse_back < limit/2 && reverse_back + reverse_front < limit/2) {
+                        matched = true;
+                        break;
+                    }
+                    min_best = std::min(min_best, reverse_front + reverse_back);
+                }
+                // if there isn't a good match, add it to the unmatched set
+                if (!matched) {
+                    ROS_INFO("Best min %f", min_best);
+                    unmatched_set.push_back(seeker);
+                } else {
+                    // I found a good match!
+                }
+            }
+            return unmatched_set;
+        }
         int measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image) {
             ROS_INFO("static map original size %d x %d", static_image.image.cols, static_image.image.rows);
             this->preprocessImages(&(static_image.image), &(dynamic_image.image));
             ROS_INFO("static map size %d x %d", static_image.image.cols, static_image.image.rows);
-            cv::imshow("Static Map", static_image.image);
+            // cv::imshow("Static Map", static_image.image);
             ROS_INFO("dynamic map size %d x %d", dynamic_image.image.cols, dynamic_image.image.rows);
-            cv::imshow("Dynamic Map", dynamic_image.image);
+            // cv::imshow("Dynamic Map", dynamic_image.image);
             int result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
             cv::waitKey(0);
             return result;
@@ -112,6 +162,9 @@ class ImageTester {
         image_transport::Publisher static_image_pub_;
         image_transport::Publisher dynamic_image_pub_;
         image_transport::Publisher heatmap_pub_;
+        double distance_measure(int start_x, int start_y, int end_x, int end_y) {
+            return pow(start_x - end_x, 2) + pow(start_y - end_y, 2);
+        }
 };
 
 int main(int argc, char** argv) {
