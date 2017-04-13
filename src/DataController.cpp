@@ -59,7 +59,7 @@ class DataController {
             cv_bridge::CvImagePtr static_image;
             cv_bridge::CvImagePtr dynamic_image;
             if (static_map_client_.call(srv)) {
-                ROS_INFO("Successfull call static map");
+                ROS_DEBUG("Successfull call static map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
                 static_image = this->gridToCroppedCvImage(&og, &alert);
 
@@ -69,7 +69,7 @@ class DataController {
                 ROS_WARN("Failed to get static map");
             }
             if (dynamic_map_client_.call(srv)) {
-                ROS_INFO("Successfull call dynamic map");
+                ROS_DEBUG("Successfull call dynamic map");
                 nav_msgs::OccupancyGrid og = srv.response.map;
                 dynamic_image = this->gridToCroppedCvImage(&og, &alert);
 
@@ -83,11 +83,13 @@ class DataController {
             // perimeter encoded as part of the alert and images aligned to alert perimeter
 
             // use a single method that captures preprocessing and quantification
-            alert.level = this->measureDifference(*static_image, *dynamic_image);
+            std::vector<quirkd::Alert> alerts = this->measureDifference(*static_image, *dynamic_image);
 
-            // TODO publish difference
-            ROS_INFO("The two images have a difference of %d", alert.level);
-            alert_pub_.publish(alert);
+            ROS_INFO("PUBLISHING %d alerts", (int) (alerts.size()));
+            for( size_t i = 0; i < alerts.size(); i++ ) {
+                quirkd::Alert alert = alerts[i];
+                alert_pub_.publish(alert);
+            }
 
             updated = false;
         }
@@ -280,7 +282,7 @@ class DataController {
         }
         void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image) {
         }
-        int quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
+        std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed) {
             /* Compute difference
              * Steps:
              * - identify edges
@@ -317,30 +319,31 @@ class DataController {
             double unmatched_quantifier = 0.0;
 
             // find unmatched dynamic lines (red)
-            std::vector<cv::Vec4i> unmatched_lines = this->filterEdgesByMatching(static_lines, dynamic_lines);
-            for( size_t i = 0; i < unmatched_lines.size(); i++ ) {
-                cv::Vec4i l = unmatched_lines[i];
+            std::vector<cv::Vec4i> unmatched_dynamic = this->filterEdgesByMatching(static_lines, dynamic_lines);
+            for( size_t i = 0; i < unmatched_dynamic.size(); i++ ) {
+                cv::Vec4i l = unmatched_dynamic[i];
                 cv::line( unmatched_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
                 unmatched_quantifier += this->distance_measure(l[0], l[1], l[2], l[3]);
             }
             // find unmatched static lines (red)
-            unmatched_lines = this->filterEdgesByMatching(dynamic_lines, static_lines);
-            for( size_t i = 0; i < unmatched_lines.size(); i++ ) {
-                cv::Vec4i l = unmatched_lines[i];
+            std::vector<cv::Vec4i> unmatched_static = this->filterEdgesByMatching(dynamic_lines, static_lines);
+            for( size_t i = 0; i < unmatched_static.size(); i++ ) {
+                cv::Vec4i l = unmatched_static[i];
                 cv::line( unmatched_cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,255,0), 2, CV_AA);
                 unmatched_quantifier += this->distance_measure(l[0], l[1], l[2], l[3]);
             }
             
-            int alert_level = (int) (unmatched_quantifier);
+            int total_alert_level = (int) (unmatched_quantifier);
 
             cv_bridge::CvImage anomaly_visualization;
             anomaly_visualization.encoding = sensor_msgs::image_encodings::BGR8;
             anomaly_visualization.image = unmatched_cdst;
-            ROS_INFO("publish visualization");
+            ROS_DEBUG("publish visualization");
             visualization_pub_.publish(anomaly_visualization.toImageMsg());
             
-            // return sum of the absdiff
-            return alert_level;
+            // return the minimized set of alerts
+            std::vector<quirkd::Alert> alerts = this->minimizeAlerts(unmatched_static, unmatched_dynamic);
+            return alerts;
         }
         std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges) {
             std::vector<cv::Vec4i> unmatched_set;
@@ -373,7 +376,7 @@ class DataController {
                 }
                 // if there isn't a good match, add it to the unmatched set
                 if (!matched) {
-                    ROS_INFO("Best min %f", min_best);
+                    // ROS_INFO("Best min %f", min_best);
                     unmatched_set.push_back(seeker);
                 } else {
                     // I found a good match!
@@ -381,10 +384,38 @@ class DataController {
             }
             return unmatched_set;
         }
-        int measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image) {
+        std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image) {
             this->preprocessImages(&(static_image.image), &(dynamic_image.image));
-            int result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
+            std::vector<quirkd::Alert> result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
             return result;
+        }
+        std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_static, std::vector<cv::Vec4i> unmatched_dynamic) {
+            std::vector<quirkd::Alert> alerts;
+            float map_resolution = 0.05; // meters per cell/pixel
+            for( size_t i = 0; i < unmatched_static.size(); i++ ) { 
+                cv::Vec4i l = unmatched_static[i];
+                quirkd::Alert alert;
+                alert.level = (int) (this->distance_measure(l[0], l[1], l[2], l[3]));
+                // ROS_INFO("alert.level %d", alert.level);
+                alert.min_x = std::min(l[0], l[2]) * map_resolution;
+                alert.max_x = std::max(l[0], l[2]) * map_resolution;
+                if (alert.max_x - alert.min_x < .01) {
+                    alert.max_x += .05;
+                    alert.min_x -= .05;
+                }
+                // ROS_INFO("alert.min_x %.2f", alert.min_x);
+                // ROS_INFO("alert.max_x %.2f", alert.max_x);
+                alert.min_y = std::min(l[1], l[3]) * map_resolution;
+                alert.max_y = std::max(l[1], l[3]) * map_resolution;
+                if (alert.max_y - alert.min_y < .01) {
+                    alert.max_y += .05;
+                    alert.min_y -= .05;
+                }
+                // ROS_INFO("alert.min_y %.2f", alert.min_y);
+                // ROS_INFO("alert.max_y %.2f", alert.max_y);
+                alerts.push_back(alert);
+            }
+            return alerts;
         }
 };
 

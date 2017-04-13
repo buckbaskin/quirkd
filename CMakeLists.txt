@@ -8,16 +8,17 @@ project(quirkd)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nav_msgs
   roscpp
   rospy
+  cv_bridge
+  geometry_msgs
+  image_transport
+  message_generation
+  nav_msgs
   sensor_msgs
   std_msgs
-  geometry_msgs
   tf
-  message_generation
-  cv_bridge
-  image_transport
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,6 +60,7 @@ add_message_files(
   msg
   FILES
   Alert.msg
+  AlertArray.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -118,7 +120,7 @@ generate_messages(
 catkin_package(
 INCLUDE_DIRS include
 # LIBRARIES libquirkd
-CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime
+CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
