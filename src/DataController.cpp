@@ -10,6 +10,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <quirkd/Alert.h>
+#include <quirkd/AlertArray.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/image_encodings.h>
 #include <tf/transform_listener.h>
@@ -20,7 +21,7 @@ class DataController {
         DataController() 
             : it_(n_)
         {
-            alert_pub_ = n_.advertise<quirkd::Alert>("/quirkd/alert/notification", 1);
+            alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/alertArray/notification", 1);
             laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
             ROS_INFO("WaitForService(\"static_map\");");
             ros::service::waitForService("static_map");
@@ -86,10 +87,7 @@ class DataController {
             std::vector<quirkd::Alert> alerts = this->measureDifference(*static_image, *dynamic_image);
 
             ROS_INFO("PUBLISHING %d alerts", (int) (alerts.size()));
-            for( size_t i = 0; i < alerts.size(); i++ ) {
-                quirkd::Alert alert = alerts[i];
-                alert_pub_.publish(alert);
-            }
+            alert_pub_.publish(alerts);
 
             updated = false;
         }
