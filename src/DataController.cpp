@@ -94,10 +94,11 @@ public:
     // perimeter encoded as part of the alert and images aligned to alert perimeter
 
     // use a single method that captures preprocessing and quantification
-    std::vector<quirkd::Alert> alerts = this->measureDifference(*static_image, *dynamic_image);
+    quirkd::AlertArray aa;
+    aa.alerts = this->measureDifference(*static_image, *dynamic_image);
 
-    ROS_INFO("PUBLISHING %d alerts", (int)(alerts.size()));
-    alert_pub_.publish(alerts);
+    ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
+    alert_pub_.publish(aa);
 
     updated = false;
   }
