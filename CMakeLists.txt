@@ -160,10 +160,10 @@ target_link_libraries(
     ${catkin_LIBRARIES}
 )
 add_executable(
-    DataController src/DataController.cpp
+    data_controller src/data_controller.cpp
 )
 target_link_libraries(
-    DataController
+    data_controller
     ${catkin_LIBRARIES}
 )
 add_executable(
