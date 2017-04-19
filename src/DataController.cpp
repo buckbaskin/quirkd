@@ -21,7 +21,7 @@ class DataController
 public:
   DataController() : it_(n_)
   {
-    alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/alertArray/notification", 1);
+    alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/alert_array/notification", 1);
     laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
     ROS_INFO("WaitForService(\"static_map\");");
     ros::service::waitForService("static_map");

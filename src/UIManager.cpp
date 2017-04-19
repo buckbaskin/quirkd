@@ -12,13 +12,12 @@ public:
   UIManager()
   {
     this->n = new ros::NodeHandle();
-    lowPub = this->n->advertise<geometry_msgs::PolygonStamped>("/lowAlert", 1);
-    warnPub = this->n->advertise<geometry_msgs::PolygonStamped>("/warnAlert", 1);
-    maxPub = this->n->advertise<geometry_msgs::PolygonStamped>("/maxAlert", 1);
-    maxPub = this->n->advertise<geometry_msgs::PolygonStamped>("/maxAlert", 1);
-    linePub = this->n->advertise<visualization_msgs::Marker>("/maxAlert", 1);
+    lowPub = this->n->advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
+    warnPub = this->n->advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
+    maxPub = this->n->advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
+    linePub = this->n->advertise<visualization_msgs::Marker>("/max_line_alert", 1);
     alertSub = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
-    alertArraySub = this->n->subscribe("/quirkd/alertArray/notification", 1, &UIManager::alertArrayCB, this);
+    alertArraySub = this->n->subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
     ROS_INFO("Done with UIManager constructor");
   }
   void alertCB(const quirkd::Alert &alert)
