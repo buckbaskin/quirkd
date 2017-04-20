@@ -149,6 +149,13 @@ target_link_libraries(
     libdata_controller
     ${catkin_LIBRARIES}
 )
+add_library(
+  libimage_processing src/libimage_processing.cpp
+)
+target_link_libraries(
+    libimage_processing
+    ${catkin_LIBRARIES}
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

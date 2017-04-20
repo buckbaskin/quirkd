@@ -19,36 +19,29 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef QUIRKD_UI_MANAGER_H
-#define QUIRKD_UI_MANAGER_H
+#ifndef QUIRKD_IMAGE_PROCESSING_H
+#define QUIRKD_IMAGE_PROCESSING_H
 
 #include <ros/ros.h>
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/PolygonStamped.h>
+
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <quirkd/Alert.h>
 #include <quirkd/AlertArray.h>
-#include <visualization_msgs/Marker.h>
+#include <sensor_msgs/LaserScan.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
 
 namespace quirkd
 {
-class UIManager
-{
-public:
-  UIManager(ros::NodeHandle nh);
-  void alertCB(const quirkd::Alert &alert);
-  void alertArrayCB(const quirkd::AlertArray &msg);
-  void extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg);
-  void publishLineList(ros::Publisher *pub, std::vector<geometry_msgs::Point> *points);
-  void publishPolygon(ros::Publisher *pub, float min_x, float max_x, float min_y, float max_y);
-
-private:
-  ros::NodeHandle n_;
-  // ros::Publisher low_pub_;
-  // ros::Publisher warn_pub_;
-  // ros::Publisher max_pub_;
-  ros::Publisher line_pub_;
-  ros::Subscriber alert_sub_;
-  ros::Subscriber alertArray_sub_;
-};
+  cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert);
+  void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert);
+  std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
+                                                cv::Mat* dynamic_processed,
+                                                quirkd::Alert* alert);
+  std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
+                                               cv_bridge::CvImage dynamic_image,
+                                               quirkd::Alert* alert);
 }  // namespace quirkd
-#endif  // QUIRKD_UI_MANAGER_H
+#endif  // QUIRKD_IMAGE_PROCSESING_H
