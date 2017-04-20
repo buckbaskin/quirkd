@@ -143,11 +143,6 @@ public:
     ROS_INFO("Publish polygon %.2f %.2f %.2f %.2f", min_x, max_x, min_y, max_y);
     pub->publish(ps);
   }
-  int add1(int i)
-  {
-    alertSub = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
-    return i + 1;
-  }
 
 private:
   ros::NodeHandle *n;
@@ -164,7 +159,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "UIManager");
   ROS_INFO("Init in UIManager");
   UIManager ui;
-  ui.add1(2);
 
   ros::spin();
 }
