@@ -153,10 +153,10 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/quirkd_node.cpp)
 add_executable(
-    ImageTester src/ImageTester.cpp
+    image_tester src/image_tester.cpp
 )
 target_link_libraries(
-    ImageTester
+    image_tester
     ${catkin_LIBRARIES}
 )
 add_executable(
@@ -167,10 +167,10 @@ target_link_libraries(
     ${catkin_LIBRARIES}
 )
 add_executable(
-    UIManager src/UIManager.cpp
+    ui_manager src/ui_manager.cpp
 )
 target_link_libraries(
-    UIManager
+    ui_manager
     ${catkin_LIBRARIES}
 )
 
