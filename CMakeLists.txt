@@ -8,16 +8,17 @@ project(quirkd)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nav_msgs
   roscpp
   rospy
+  cv_bridge
+  geometry_msgs
+  image_transport
+  message_generation
+  nav_msgs
   sensor_msgs
   std_msgs
-  geometry_msgs
   tf
-  message_generation
-  cv_bridge
-  image_transport
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,6 +60,7 @@ add_message_files(
   msg
   FILES
   Alert.msg
+  AlertArray.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -117,8 +119,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-# LIBRARIES libquirkd
-CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime
+LIBRARIES libdata_controller
+CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -140,6 +142,13 @@ include_directories(
 #   # src/${PROJECT_NAME}/libquirkd/view.cpp 
 #   # src/${PROJECT_NAME}/libquirkd/controller.cpp 
 # )
+add_library(
+  libdata_controller src/libdata_controller.cpp
+)
+target_link_libraries(
+    libdata_controller
+    ${catkin_LIBRARIES}
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -151,24 +160,25 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/quirkd_node.cpp)
 add_executable(
-    ImageTester src/ImageTester.cpp
+    image_tester src/image_tester.cpp
 )
 target_link_libraries(
-    ImageTester
+    image_tester
     ${catkin_LIBRARIES}
 )
 add_executable(
-    DataController src/DataController.cpp
+    data_controller_node src/data_controller_node.cpp
 )
 target_link_libraries(
-    DataController
+    data_controller_node
+    libdata_controller
     ${catkin_LIBRARIES}
 )
 add_executable(
-    UIManager src/UIManager.cpp
+    ui_manager src/ui_manager.cpp
 )
 target_link_libraries(
-    UIManager
+    ui_manager
     ${catkin_LIBRARIES}
 )
 
@@ -207,6 +217,20 @@ target_link_libraries(
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+#Install library
+install(TARGETS libdata_controller data_controller_node
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+    
+#Install library includes
+install(DIRECTORY include/quirkd/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION} )
+    
+#Install node
+install(TARGETS data_controller_node
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
