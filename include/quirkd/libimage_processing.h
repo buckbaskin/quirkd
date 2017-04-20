@@ -39,12 +39,20 @@ namespace imagep
 {
 cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert);
 void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert);
+std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original,
+                                             std::vector<cv::Vec4i> new_edges);
 std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
                                               cv::Mat* dynamic_processed,
-                                              quirkd::Alert* alert);
+                                              quirkd::Alert* alert,
+                                              image_transport::Publisher* visualization_pub);
 std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
                                              cv_bridge::CvImage dynamic_image,
-                                             quirkd::Alert* alert);
+                                             quirkd::Alert* alert,
+                                             image_transport::Publisher* visualization_pub);
+double distance_measure(int start_x, int start_y, int end_x, int end_y);
+std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
+                                                          std::vector<cv::Vec4i> unmatched_dynamic,
+                                                          quirkd::Alert* alert_msg);
 } // namespace imagep
 } // namespace quirkd
 #endif // QUIRKD_IMAGE_PROCSESING_H
