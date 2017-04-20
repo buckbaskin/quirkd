@@ -19,6 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+#include <quirkd/data_controller.h>
 #include <ros/ros.h>
 
 #include <math.h>
@@ -37,10 +38,11 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 
-class DataController
-{
-public:
-  DataController() : it_(n_)
+namespace quirkd {
+
+  DataController::DataController(ros::NodeHandle nh):
+  n_(nh),
+  it_(n_)
   {
     alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/alert_array/notification", 1);
     laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
@@ -54,10 +56,12 @@ public:
     dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
     visualization_pub_ = it_.advertise("/quirkd/test/visualization", 1);
   }
-  void laserScanCB(const sensor_msgs::LaserScan msg)
+  DataController::~DataController() {
+    ROS_INFO("Destroying DataController");
+  }
+  void DataController::laserScanCB(const sensor_msgs::LaserScan msg)
   {
     ROS_INFO("Laser Scan Callback");
-    updated = true;
     last_data = msg;
     try
     {
@@ -71,7 +75,7 @@ public:
       ROS_WARN("tf fetch failed. %s", ex.what());
     }
   }
-  void update()
+  void DataController::update()
   {
     quirkd::Alert alert;
     alert.level = 0;
@@ -121,15 +125,12 @@ public:
     ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
     alert_pub_.publish(aa);
 
-    updated = false;
   }
-  bool updated;
+  
   sensor_msgs::LaserScan last_data;
   tf::StampedTransform last_tf;
-
-private:
   ros::NodeHandle n_;
-  image_transport::ImageTransport it_;
+  // image_transport::ImageTransport it_;
   image_transport::Publisher static_image_pub_;
   image_transport::Publisher dynamic_image_pub_;
   image_transport::Publisher visualization_pub_;
@@ -138,7 +139,7 @@ private:
   ros::ServiceClient dynamic_map_client_;
   ros::ServiceClient static_map_client_;
   tf::TransformListener tf_;
-  void updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan, const tf::StampedTransform tf)
+  void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan, const tf::StampedTransform tf)
   {
     double base_x = tf.getOrigin().x();
     double base_y = tf.getOrigin().y();
@@ -176,7 +177,7 @@ private:
     alert->max_x += padding;
     alert->max_y += padding;
   }
-  cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert)
+  cv_bridge::CvImagePtr DataController::gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert)
   {
     // Unpack the Occupancy Grid
 
@@ -308,14 +309,14 @@ private:
     cv_ptr->image = base;
     return cv_ptr;
   }
-  double distance_measure(int start_x, int start_y, int end_x, int end_y)
+  double DataController::distance_measure(int start_x, int start_y, int end_x, int end_y)
   {
     return pow(start_x - end_x, 2) + pow(start_y - end_y, 2);
   }
-  void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image)
+  void DataController::preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image)
   {
   }
-  std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed)
+  std::vector<quirkd::Alert> DataController::quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed)
   {
     /* Compute difference
      * Steps:
@@ -385,7 +386,7 @@ private:
     std::vector<quirkd::Alert> alerts = this->minimizeAlerts(unmatched_static, unmatched_dynamic);
     return alerts;
   }
-  std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges)
+  std::vector<cv::Vec4i> DataController::filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges)
   {
     std::vector<cv::Vec4i> unmatched_set;
     const double limit = 1000;
@@ -432,13 +433,13 @@ private:
     }
     return unmatched_set;
   }
-  std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image)
+  std::vector<quirkd::Alert> DataController::measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image)
   {
     this->preprocessImages(&(static_image.image), &(dynamic_image.image));
     std::vector<quirkd::Alert> result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
     return result;
   }
-  std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
+  std::vector<quirkd::Alert> DataController::minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
                                             std::vector<cv::Vec4i> unmatched_dynamic)
   {
     std::vector<quirkd::Alert> alerts;
@@ -471,27 +472,23 @@ private:
     }
     return alerts;
   }
-};
+
+} // namespace quirkd
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "DataController");
-  DataController dp;
-  dp.updated = false;
+  ros::NodeHandle nh;
+  quirkd::DataController dp(nh);
   ros::Rate r(30);
 
   dp.update();
   while (ros::ok())
   {
     ros::spinOnce();
-    if (dp.updated || true)
-    {
-      dp.update();
-      ROS_INFO("Processed message data in loop");
-    }
-    // dp.pub_alert_status();
+    dp.update();
     r.sleep();
   }
-  ROS_INFO("Data Processor Exited.");
+  ROS_INFO("DataController Exited.");
   return 0;
 }

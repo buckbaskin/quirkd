@@ -119,7 +119,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-# LIBRARIES libquirkd
+LIBRARIES data_controller
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
@@ -142,6 +142,13 @@ include_directories(
 #   # src/${PROJECT_NAME}/libquirkd/view.cpp 
 #   # src/${PROJECT_NAME}/libquirkd/controller.cpp 
 # )
+add_library(
+  data_controller src/data_controller.cpp
+)
+target_link_libraries(
+    data_controller
+    ${catkin_LIBRARIES}
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -159,13 +166,13 @@ target_link_libraries(
     image_tester
     ${catkin_LIBRARIES}
 )
-add_executable(
-    data_controller src/data_controller.cpp
-)
-target_link_libraries(
-    data_controller
-    ${catkin_LIBRARIES}
-)
+# add_executable(
+#     data_controller src/data_controller.cpp
+# )
+# target_link_libraries(
+#     data_controller
+#     ${catkin_LIBRARIES}
+# )
 add_executable(
     ui_manager src/ui_manager.cpp
 )
