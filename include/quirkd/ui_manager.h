@@ -22,7 +22,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point32.h>
-// #include <geometry_msgs/PolygonStamped.h>
+#include <geometry_msgs/PolygonStamped.h>
 #include <quirkd/Alert.h>
 #include <quirkd/AlertArray.h>
 #include <visualization_msgs/Marker.h>
