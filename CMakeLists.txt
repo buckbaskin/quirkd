@@ -217,6 +217,20 @@ target_link_libraries(
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
+#Install library
+install(TARGETS data_controller data_controller_node
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+    
+#Install library includes
+install(DIRECTORY include/quirkd/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION} )
+    
+#Install node
+install(TARGETS data_controller_node
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
+
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
