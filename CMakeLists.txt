@@ -119,7 +119,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES libdata_controller
+LIBRARIES libdata_controller libimage_processing
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
@@ -149,6 +149,13 @@ target_link_libraries(
     libdata_controller
     ${catkin_LIBRARIES}
 )
+add_library(
+  libimage_processing src/libimage_processing.cpp
+)
+target_link_libraries(
+    libimage_processing
+    ${catkin_LIBRARIES}
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -172,6 +179,7 @@ add_executable(
 target_link_libraries(
     data_controller_node
     libdata_controller
+    libimage_processing
     ${catkin_LIBRARIES}
 )
 add_executable(
@@ -219,7 +227,7 @@ target_link_libraries(
 # )
 
 #Install library
-install(TARGETS libdata_controller data_controller_node
+install(TARGETS libdata_controller libimage_processing data_controller_node
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})

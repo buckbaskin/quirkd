@@ -24,6 +24,8 @@
 
 #include <ros/ros.h>
 
+#include <quirkd/libimage_processing.h>
+
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <nav_msgs/OccupancyGrid.h>
@@ -60,19 +62,6 @@ private:
   tf::TransformListener tf_;
 
   void updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan, const tf::StampedTransform tf);
-  cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert);
-  double distance_measure(int start_x, int start_y, int end_x, int end_y);
-  void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert);
-  std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
-                                                cv::Mat* dynamic_processed,
-                                                quirkd::Alert* alert);
-  std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges);
-  std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
-                                               cv_bridge::CvImage dynamic_image,
-                                               quirkd::Alert* alert);
-  std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
-                                            std::vector<cv::Vec4i> unmatched_dynamic,
-                                            quirkd::Alert* alert_msg);
 };
 
 }  // namespace quirkd

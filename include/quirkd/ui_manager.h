@@ -19,6 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+#ifndef QUIRKD_UI_MANAGER_H
+#define QUIRKD_UI_MANAGER_H
+
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PolygonStamped.h>
@@ -48,3 +51,4 @@ private:
   ros::Subscriber alertArray_sub_;
 };
 }  // namespace quirkd
+#endif  // QUIRKD_UI_MANAGER_H
