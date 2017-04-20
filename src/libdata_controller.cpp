@@ -434,6 +434,54 @@ std::vector<quirkd::Alert> DataController::minimizeAlerts(std::vector<cv::Vec4i>
                                                           std::vector<cv::Vec4i> unmatched_dynamic,
                                                           quirkd::Alert* alert_msg)
 {
+  std::vector<cv::Vec4i> combined;
+  combined = unmatched_static;
+  // combined.reserve(combined.size() + distance(unmatched_dynamic.begin(), unmatched_dynamic.end()));
+  combined.insert(combined.end(), unmatched_dynamic.begin(), unmatched_dynamic.end());
+
+  int last_combined_size = (int) combined.size() + 1;
+  int i, j;
+  
+  if (unmatched_dynamic.size() > 0) {
+    cv::Vec4i udlead = unmatched_dynamic[0];
+    ROS_INFO("unmatched_dynamic[0] (%.2f, %.2f) && (%.2f, %.2f)", udlead[0], udlead[2], udlead[1], udlead[3]);
+  }
+
+  while (combined.size() < last_combined_size) {
+    last_combined_size = (int) combined.size();
+    i = 0;
+    ROS_INFO("Reduction step in minimizeAlerts %d", last_combined_size);
+    while (i < (int) combined.size()) {
+      cv::Vec4i base = combined[i];
+      cv::Rect base_rect(base[0], base[1], base[2]-base[0], base[3]-base[1]);
+      base_rect.height += 2;
+      base_rect.width += 2;
+      j = i+1;
+      while (j < (int) combined.size()) {
+        cv::Vec4i merge_candidate = combined[j];
+        cv::Rect merge_rect(merge_candidate[0], merge_candidate[1], merge_candidate[2]-merge_candidate[0], merge_candidate[3]-merge_candidate[1]);
+        merge_rect.height += 2;
+        merge_rect.width += 2;
+        ROS_INFO("base (%d %d) && (%d, %d)", base[0], base[2], base[1], base[3]);
+        ROS_INFO("merge (%d %d) && (%d, %d)", merge_candidate[0], merge_candidate[2], merge_candidate[1], merge_candidate[3]);
+        ROS_INFO("area %d", (base_rect & merge_rect).area());
+        if ((base_rect & merge_rect).area() > 0.0) {
+          ROS_INFO("Rectangle overlap for indexes %d and %d", i, j);
+          // combine the two
+          // remove the old version
+          combined.erase(combined.begin() + j);
+          cv::Rect combined_rect = base_rect | merge_rect;
+          cv::Vec4i updated(combined_rect.x, combined_rect.y, combined_rect.x + combined_rect.width, combined_rect.y + combined_rect.height);
+
+          combined.at(i) = updated;
+        } else {
+          j++;
+        }
+      }
+      i++;
+    }
+  }
+
   std::vector<quirkd::Alert> alerts;
   float map_resolution = 0.05;  // meters per cell/pixel
   for (size_t i = 0; i < unmatched_static.size(); i++)
