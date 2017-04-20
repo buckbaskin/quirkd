@@ -12,12 +12,12 @@ public:
   UIManager()
   {
     this->n = new ros::NodeHandle();
-    lowPub = this->n->advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
-    warnPub = this->n->advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
-    maxPub = this->n->advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
-    linePub = this->n->advertise<visualization_msgs::Marker>("/max_line_alert", 1);
-    alertSub = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
-    alertArraySub = this->n->subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
+    low_pub = this->n->advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
+    warn_pub = this->n->advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
+    max_pub = this->n->advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
+    line_pub = this->n->advertise<visualization_msgs::Marker>("/max_line_alert", 1);
+    alert_sub = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
+    alertArray_sub = this->n->subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
     ROS_INFO("Done with UIManager constructor");
   }
   void alertCB(const quirkd::Alert &alert)
@@ -25,15 +25,15 @@ public:
     ROS_DEBUG("Alert CB");
     if (alert.level < 10)
     {
-      publishPolygon(&lowPub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
+      publishPolygon(&low_pub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
     }
     else if (alert.level > 100)
     {
-      publishPolygon(&maxPub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
+      publishPolygon(&max_pub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
     }
     else
     {
-      publishPolygon(&warnPub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
+      publishPolygon(&warn_pub, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
     }
   }
   void alertArrayCB(const quirkd::AlertArray &msg)
@@ -45,7 +45,7 @@ public:
       quirkd::Alert alert = msg.alerts[i];
       this->extendLineList(&points, &alert);
     }
-    this->publishLineList(&maxPub, &points);
+    this->publishLineList(&max_pub, &points);
   }
   void extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg)
   {
@@ -146,12 +146,12 @@ public:
 
 private:
   ros::NodeHandle *n;
-  ros::Publisher lowPub;
-  ros::Publisher warnPub;
-  ros::Publisher maxPub;
-  ros::Publisher linePub;
-  ros::Subscriber alertSub;
-  ros::Subscriber alertArraySub;
+  ros::Publisher low_pub;
+  ros::Publisher warn_pub;
+  ros::Publisher max_pub;
+  ros::Publisher line_pub;
+  ros::Subscriber alert_sub;
+  ros::Subscriber alertArray_sub;
 };
 
 int main(int argc, char **argv)
