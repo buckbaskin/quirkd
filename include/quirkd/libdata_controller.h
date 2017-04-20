@@ -24,19 +24,12 @@
 
 #include <ros/ros.h>
 
-#include <math.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
-#include <nav_msgs/GetMap.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <opencv2/highgui/highgui.hpp>
 #include <quirkd/Alert.h>
 #include <quirkd/AlertArray.h>
 #include <sensor_msgs/LaserScan.h>
-#include <sensor_msgs/image_encodings.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 
