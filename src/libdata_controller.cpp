@@ -65,8 +65,8 @@ void DataController::laserScanCB(const sensor_msgs::LaserScan msg)
   try
   {
     ROS_INFO("Waiting for transform");
-    tf_.waitForTransform("/map", "/base_laser_link", ros::Time(0), ros::Duration(3.0));
-    tf_.lookupTransform("/map", "/base_laser_link", ros::Time(0), last_tf);
+    tf_.waitForTransform("/map", "/base_laser_link", ros::Time::now(), ros::Duration(3.0));
+    tf_.lookupTransform("/map", "/base_laser_link", ros::Time::now(), last_tf);
     ROS_INFO("tf success for /map to /base_laser_link");
   }
   catch (tf::TransformException& ex)
@@ -124,19 +124,6 @@ void DataController::update()
   ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
   alert_pub_.publish(aa);
 }
-
-sensor_msgs::LaserScan last_data;
-tf::StampedTransform last_tf;
-ros::NodeHandle n_;
-// image_transport::ImageTransport it_;
-image_transport::Publisher static_image_pub_;
-image_transport::Publisher dynamic_image_pub_;
-image_transport::Publisher visualization_pub_;
-ros::Publisher alert_pub_;
-ros::Subscriber laser_sub_;
-ros::ServiceClient dynamic_map_client_;
-ros::ServiceClient static_map_client_;
-tf::TransformListener tf_;
 void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
                                           const tf::StampedTransform tf)
 {

@@ -50,27 +50,27 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/Polygon
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Name: LowAlert
       Topic: /low_alert
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/Polygon
       Color: 255; 85; 0
-      Enabled: true
+      Enabled: false
       Name: WarnAlert
       Topic: /warn_alert
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/Polygon
       Color: 255; 0; 0
-      Enabled: true
+      Enabled: false
       Name: MaxAlert
       Topic: /max_alert
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 0.7
       Class: rviz/Map
       Color Scheme: raw
@@ -154,10 +154,18 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /max_line_alert
+      Name: Max Line Alert
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -186,11 +194,11 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: 26.0154
+      Scale: 10.8552
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 5.42591
-      Y: -1.47181
+      X: 5.73514
+      Y: 2.52816
     Saved: ~
 Window Geometry:
   Displays:

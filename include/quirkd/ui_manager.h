@@ -22,7 +22,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point32.h>
-#include <geometry_msgs/PolygonStamped.h>
+// #include <geometry_msgs/PolygonStamped.h>
 #include <quirkd/Alert.h>
 #include <quirkd/AlertArray.h>
 #include <visualization_msgs/Marker.h>
@@ -41,9 +41,9 @@ public:
 
 private:
   ros::NodeHandle n_;
-  ros::Publisher low_pub_;
-  ros::Publisher warn_pub_;
-  ros::Publisher max_pub_;
+  // ros::Publisher low_pub_;
+  // ros::Publisher warn_pub_;
+  // ros::Publisher max_pub_;
   ros::Publisher line_pub_;
   ros::Subscriber alert_sub_;
   ros::Subscriber alertArray_sub_;
