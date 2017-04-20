@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <quirkd/data_controller.h>
+#include <quirkd/libdata_controller.h>
 #include <ros/ros.h>
 
 #include <math.h>

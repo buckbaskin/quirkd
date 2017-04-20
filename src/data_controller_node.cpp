@@ -1,4 +1,4 @@
-#include <quirkd/data_controller.h>
+#include <quirkd/libdata_controller.h>
 
 int main(int argc, char** argv)
 {

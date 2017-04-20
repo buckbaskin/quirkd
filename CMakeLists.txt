@@ -119,7 +119,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES data_controller
+LIBRARIES libdata_controller
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
@@ -143,10 +143,10 @@ include_directories(
 #   # src/${PROJECT_NAME}/libquirkd/controller.cpp 
 # )
 add_library(
-  data_controller src/data_controller.cpp
+  libdata_controller src/libdata_controller.cpp
 )
 target_link_libraries(
-    data_controller
+    libdata_controller
     ${catkin_LIBRARIES}
 )
 
@@ -171,6 +171,7 @@ add_executable(
 )
 target_link_libraries(
     data_controller_node
+    libdata_controller
     ${catkin_LIBRARIES}
 )
 add_executable(
@@ -218,7 +219,7 @@ target_link_libraries(
 # )
 
 #Install library
-install(TARGETS data_controller data_controller_node
+install(TARGETS libdata_controller data_controller_node
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
