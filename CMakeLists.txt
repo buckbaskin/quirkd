@@ -166,13 +166,13 @@ target_link_libraries(
     image_tester
     ${catkin_LIBRARIES}
 )
-# add_executable(
-#     data_controller src/data_controller.cpp
-# )
-# target_link_libraries(
-#     data_controller
-#     ${catkin_LIBRARIES}
-# )
+add_executable(
+    data_controller_node src/data_controller_node.cpp
+)
+target_link_libraries(
+    data_controller_node
+    ${catkin_LIBRARIES}
+)
 add_executable(
     ui_manager src/ui_manager.cpp
 )
