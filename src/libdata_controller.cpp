@@ -65,8 +65,8 @@ void DataController::laserScanCB(const sensor_msgs::LaserScan msg)
   try
   {
     ROS_INFO("Waiting for transform");
-    tf_.waitForTransform("/map", "/base_laser_link", ros::Time(0), ros::Duration(3.0));
-    tf_.lookupTransform("/map", "/base_laser_link", ros::Time(0), last_tf);
+    tf_.waitForTransform("/map", "/base_laser_link", ros::Time::now(), ros::Duration(3.0));
+    tf_.lookupTransform("/map", "/base_laser_link", ros::Time::now(), last_tf);
     ROS_INFO("tf success for /map to /base_laser_link");
   }
   catch (tf::TransformException& ex)
@@ -119,24 +119,11 @@ void DataController::update()
 
   // use a single method that captures preprocessing and quantification
   quirkd::AlertArray aa;
-  aa.alerts = this->measureDifference(*static_image, *dynamic_image);
+  aa.alerts = measureDifference(*static_image, *dynamic_image, &alert);
 
   ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
   alert_pub_.publish(aa);
 }
-
-sensor_msgs::LaserScan last_data;
-tf::StampedTransform last_tf;
-ros::NodeHandle n_;
-// image_transport::ImageTransport it_;
-image_transport::Publisher static_image_pub_;
-image_transport::Publisher dynamic_image_pub_;
-image_transport::Publisher visualization_pub_;
-ros::Publisher alert_pub_;
-ros::Subscriber laser_sub_;
-ros::ServiceClient dynamic_map_client_;
-ros::ServiceClient static_map_client_;
-tf::TransformListener tf_;
 void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
                                           const tf::StampedTransform tf)
 {
@@ -312,10 +299,12 @@ double DataController::distance_measure(int start_x, int start_y, int end_x, int
 {
   return pow(start_x - end_x, 2) + pow(start_y - end_y, 2);
 }
-void DataController::preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image)
+void DataController::preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert)
 {
 }
-std::vector<quirkd::Alert> DataController::quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed)
+std::vector<quirkd::Alert> DataController::quantifyDifference(cv::Mat* static_processed,
+                                                              cv::Mat* dynamic_processed,
+                                                              quirkd::Alert* alert)
 {
   /* Compute difference
    * Steps:
@@ -382,7 +371,7 @@ std::vector<quirkd::Alert> DataController::quantifyDifference(cv::Mat* static_pr
   visualization_pub_.publish(anomaly_visualization.toImageMsg());
 
   // return the minimized set of alerts
-  std::vector<quirkd::Alert> alerts = this->minimizeAlerts(unmatched_static, unmatched_dynamic);
+  std::vector<quirkd::Alert> alerts = this->minimizeAlerts(unmatched_static, unmatched_dynamic, alert);
   return alerts;
 }
 std::vector<cv::Vec4i> DataController::filterEdgesByMatching(std::vector<cv::Vec4i> original,
@@ -434,14 +423,16 @@ std::vector<cv::Vec4i> DataController::filterEdgesByMatching(std::vector<cv::Vec
   return unmatched_set;
 }
 std::vector<quirkd::Alert> DataController::measureDifference(cv_bridge::CvImage static_image,
-                                                             cv_bridge::CvImage dynamic_image)
+                                                             cv_bridge::CvImage dynamic_image,
+                                                             quirkd::Alert* alert)
 {
-  this->preprocessImages(&(static_image.image), &(dynamic_image.image));
-  std::vector<quirkd::Alert> result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image));
+  this->preprocessImages(&(static_image.image), &(dynamic_image.image), alert);
+  std::vector<quirkd::Alert> result = this->quantifyDifference(&(static_image.image), &(dynamic_image.image), alert);
   return result;
 }
 std::vector<quirkd::Alert> DataController::minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
-                                                          std::vector<cv::Vec4i> unmatched_dynamic)
+                                                          std::vector<cv::Vec4i> unmatched_dynamic,
+                                                          quirkd::Alert* alert_msg)
 {
   std::vector<quirkd::Alert> alerts;
   float map_resolution = 0.05;  // meters per cell/pixel
@@ -451,8 +442,8 @@ std::vector<quirkd::Alert> DataController::minimizeAlerts(std::vector<cv::Vec4i>
     quirkd::Alert alert;
     alert.level = (int)(this->distance_measure(l[0], l[1], l[2], l[3]));
     // ROS_INFO("alert.level %d", alert.level);
-    alert.min_x = std::min(l[0], l[2]) * map_resolution;
-    alert.max_x = std::max(l[0], l[2]) * map_resolution;
+    alert.min_x = std::min(l[0], l[2]) * map_resolution + alert_msg->min_x;
+    alert.max_x = std::max(l[0], l[2]) * map_resolution + alert_msg->min_x;
     if (alert.max_x - alert.min_x < .01)
     {
       alert.max_x += .05;
@@ -460,8 +451,34 @@ std::vector<quirkd::Alert> DataController::minimizeAlerts(std::vector<cv::Vec4i>
     }
     // ROS_INFO("alert.min_x %.2f", alert.min_x);
     // ROS_INFO("alert.max_x %.2f", alert.max_x);
-    alert.min_y = std::min(l[1], l[3]) * map_resolution;
-    alert.max_y = std::max(l[1], l[3]) * map_resolution;
+    alert.min_y = std::min(l[1], l[3]) * map_resolution + alert_msg->min_y;
+    alert.max_y = std::max(l[1], l[3]) * map_resolution + alert_msg->min_y;
+    if (alert.max_y - alert.min_y < .01)
+    {
+      alert.max_y += .05;
+      alert.min_y -= .05;
+    }
+    // ROS_INFO("alert.min_y %.2f", alert.min_y);
+    // ROS_INFO("alert.max_y %.2f", alert.max_y);
+    alerts.push_back(alert);
+  }
+  for (size_t i = 0; i < unmatched_dynamic.size(); i++)
+  {
+    cv::Vec4i l = unmatched_dynamic[i];
+    quirkd::Alert alert;
+    alert.level = (int)(this->distance_measure(l[0], l[1], l[2], l[3]));
+    // ROS_INFO("alert.level %d", alert.level);
+    alert.min_x = std::min(l[0], l[2]) * map_resolution + alert_msg->min_x;
+    alert.max_x = std::max(l[0], l[2]) * map_resolution + alert_msg->min_x;
+    if (alert.max_x - alert.min_x < .01)
+    {
+      alert.max_x += .05;
+      alert.min_x -= .05;
+    }
+    // ROS_INFO("alert.min_x %.2f", alert.min_x);
+    // ROS_INFO("alert.max_x %.2f", alert.max_x);
+    alert.min_y = std::min(l[1], l[3]) * map_resolution + alert_msg->min_y;
+    alert.max_y = std::max(l[1], l[3]) * map_resolution + alert_msg->min_y;
     if (alert.max_y - alert.min_y < .01)
     {
       alert.max_y += .05;
