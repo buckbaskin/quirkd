@@ -21,6 +21,13 @@
  */
 #include <quirkd/libdata_controller.h>
 
+#include <math.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <nav_msgs/GetMap.h>
+#include <sensor_msgs/image_encodings.h>
+
 namespace quirkd
 {
 DataController::DataController(ros::NodeHandle nh) : n_(nh), it_(n_)
