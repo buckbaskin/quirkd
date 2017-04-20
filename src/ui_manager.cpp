@@ -19,6 +19,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+#include <quirkd/ui_manager.h>
+
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point32.h>
@@ -27,21 +29,18 @@
 #include <quirkd/AlertArray.h>
 #include <visualization_msgs/Marker.h>
 
-class UIManager
-{
-public:
-  UIManager()
+namespace quirkd {
+  UIManager::UIManager(ros::NodeHandle nh) : n_(nh)
   {
-    this->n = new ros::NodeHandle();
-    low_pub_ = this->n->advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
-    warn_pub_ = this->n->advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
-    max_pub_ = this->n->advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
-    line_pub_ = this->n->advertise<visualization_msgs::Marker>("/max_line_alert", 1);
-    alert_sub_ = this->n->subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
-    alertArray_sub_ = this->n->subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
+    low_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
+    warn_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
+    max_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
+    line_pub_ = n_.advertise<visualization_msgs::Marker>("/max_line_alert", 1);
+    alert_sub_ = n_.subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
+    alertArray_sub_ = n_.subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
     ROS_INFO("Done with UIManager constructor");
   }
-  void alertCB(const quirkd::Alert &alert)
+  void UIManager::alertCB(const quirkd::Alert &alert)
   {
     ROS_DEBUG("Alert CB");
     if (alert.level < 10)
@@ -57,18 +56,18 @@ public:
       publishPolygon(&warn_pub_, alert.min_x, alert.max_x, alert.min_y, alert.max_y);
     }
   }
-  void alertArrayCB(const quirkd::AlertArray &msg)
+  void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
   {
     ROS_DEBUG("Alerts CB");
     std::vector<geometry_msgs::Point> points;
     for (size_t i = 0; i < msg.alerts.size(); i++)
     {
       quirkd::Alert alert = msg.alerts[i];
-      this->extendLineList(&points, &alert);
+      extendLineList(&points, &alert);
     }
-    this->publishLineList(&max_pub_, &points);
+    publishLineList(&max_pub_, &points);
   }
-  void extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg)
+  void UIManager::extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg)
   {
     geometry_msgs::Point minmin;
     minmin.x = msg->min_x;
@@ -95,7 +94,7 @@ public:
     points->push_back(maxmin);
     points->push_back(minmin);
   }
-  void publishLineList(ros::Publisher *pub, std::vector<geometry_msgs::Point> *points)
+  void UIManager::publishLineList(ros::Publisher *pub, std::vector<geometry_msgs::Point> *points)
   {
     visualization_msgs::Marker marker;
 
@@ -124,7 +123,7 @@ public:
     marker.points = *points;
     pub->publish(marker);
   }
-  void publishPolygon(ros::Publisher *pub, float min_x, float max_x, float min_y, float max_y)
+  void UIManager::publishPolygon(ros::Publisher *pub, float min_x, float max_x, float min_y, float max_y)
   {
     if (max_x - min_x < .01)
     {
@@ -164,22 +163,13 @@ public:
     ROS_INFO("Publish polygon %.2f %.2f %.2f %.2f", min_x, max_x, min_y, max_y);
     pub->publish(ps);
   }
-
-private:
-  ros::NodeHandle *n;
-  ros::Publisher low_pub_;
-  ros::Publisher warn_pub_;
-  ros::Publisher max_pub_;
-  ros::Publisher line_pub_;
-  ros::Subscriber alert_sub_;
-  ros::Subscriber alertArray_sub_;
-};
-
+} // namespace quirkd
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "UIManager");
   ROS_INFO("Init in UIManager");
-  UIManager ui;
+  ros::NodeHandle nh;
+  quirkd::UIManager ui(nh);
 
   ros::spin();
 }
