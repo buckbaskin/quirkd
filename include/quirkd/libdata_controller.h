@@ -24,6 +24,8 @@
 
 #include <ros/ros.h>
 
+#include <quirkd/libimage_processing.h>
+
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <nav_msgs/OccupancyGrid.h>

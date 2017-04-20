@@ -35,13 +35,16 @@
 
 namespace quirkd
 {
-  cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert);
-  void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert);
-  std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
-                                                cv::Mat* dynamic_processed,
-                                                quirkd::Alert* alert);
-  std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
-                                               cv_bridge::CvImage dynamic_image,
-                                               quirkd::Alert* alert);
-}  // namespace quirkd
-#endif  // QUIRKD_IMAGE_PROCSESING_H
+namespace imagep
+{
+cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert);
+void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert);
+std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
+                                              cv::Mat* dynamic_processed,
+                                              quirkd::Alert* alert);
+std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
+                                             cv_bridge::CvImage dynamic_image,
+                                             quirkd::Alert* alert);
+} // namespace imagep
+} // namespace quirkd
+#endif // QUIRKD_IMAGE_PROCSESING_H

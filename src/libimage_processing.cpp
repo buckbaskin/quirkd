@@ -23,6 +23,8 @@
 
 namespace quirkd
 {
+	namespace imagep
+	{
 cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert)
 {
   // Unpack the Occupancy Grid
@@ -155,4 +157,5 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd
   cv_ptr->image = base;
   return cv_ptr;
 }
+} // namespace imagep
 } // namespace quirkd
