@@ -1,8 +1,10 @@
+#!/usr/bin/python
 import rospy
+import math
 
-from geometry_msgs import Vector3
-from sensor_msgs import LaserScan
-from std_msgs import Float64
+from geometry_msgs.msg import Vector3
+from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Float64
 
 # Params to match columns to angles
 '''
@@ -70,16 +72,19 @@ def laser_callback(msg):
     dist_accum = 0
     min_observed_dist = msg.range_max
     min_observed_angle = angle_min
+    
+    average_this_many = 3
+
     for index, value in enumerate(msg.ranges):
-        if index < 3:
+        if index < average_this_many:
             dist_accum += value
         else:
             dist_accum += value
-            dist_accum -= msg.ranges[index - 3]
-        if dist_accum / 3 < min_observed_dist:
-            min_observed_dist = dist_accum / 3
+            dist_accum -= msg.ranges[index - average_this_many]
+        if dist_accum / average_this_many < min_observed_dist:
+            min_observed_dist = dist_accum / average_this_many
             min_observed_angle = angle_min + ((index - 1) * angle_inc)
-
+    rospy.loginfo('Match minimum scan angle.')
     publish_minimum_angle(min_observed_dist, min_observed_angle)
 
 def centroid_callback(msg):
@@ -89,6 +94,7 @@ def centroid_callback(msg):
     if last_scan is not None:
         # TODO look at last scan and match nearest distance here
         pass
+    rospy.loginfo('Match centroid to scan distance.')
     publish_distance(distance, centroid_angle_radians)
 
 def listener():
@@ -97,6 +103,10 @@ def listener():
     rospy.Subscriber("/centroid", Float64, centroid_callback)
     ThermalMatchPublisher = rospy.Publisher("/thermal_match", Vector3, queue_size=10)
     MinDistPublisher = rospy.Publisher("/min_dist_to_scan", Vector3, queue_size=10)
+
+    rospy.loginfo('Begin Thermal Laser Matching.')
+
+    rospy.spin()
 
 if __name__ == '__main__':
     listener()
