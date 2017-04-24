@@ -1,4 +1,6 @@
+# Add a new map section to the existing map
+# If there are any overlaping sections with the existing map, keep the new
+#  region
 nav_msgs/OccupancyGrid map
-geometry_msgs/PoseWithCovarianceStamped initial_pose
 ---
 bool success

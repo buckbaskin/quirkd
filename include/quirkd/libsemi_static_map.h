@@ -52,6 +52,8 @@ private:
   ros::ServiceClient static_map_client_;
   nav_msgs::OccupancyGrid map_;
   geometry_msgs::PoseWithCovarianceStamped initial_pose_;
+
+  bool mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section);
 }; // class SemiStaticMap
 }  // namespace quirkd
 #endif  // QUIRKD_DATA_CONTROLLER_H

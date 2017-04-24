@@ -56,12 +56,15 @@ bool SemiStaticMap::setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::Set
 }
 bool SemiStaticMap::updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res) {
   map_ = req.map;
-  initial_pose_ = req.initial_pose;
-  res.success = true;
-  return true;
+  res.success = mergeMap(&map_, &req.map);
+  return res.success;
 }
 bool SemiStaticMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res) {
   res.map = map_;
+  return true;
+}
+
+bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section) {
   return true;
 }
 }  // namespace quirkd
