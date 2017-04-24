@@ -72,47 +72,8 @@ void SemiStaticMap::update()
   alert.max_x = 1;
   alert.min_y = 0;
   alert.max_y = 1;
-  updateAlertPerimeter(&alert, last_data, last_tf);
 
   ROS_INFO("Update Data Processor");
-  nav_msgs::GetMap srv;
-  cv_bridge::CvImagePtr static_image;
-  cv_bridge::CvImagePtr dynamic_image;
-  if (static_map_client_.call(srv))
-  {
-    ROS_DEBUG("Successfull call static map");
-    nav_msgs::OccupancyGrid og = srv.response.map;
-    static_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert);
-
-    static_image_pub_.publish(static_image->toImageMsg());
-  }
-  else
-  {
-    ROS_WARN("Failed to get static map");
-  }
-  if (dynamic_map_client_.call(srv))
-  {
-    ROS_DEBUG("Successfull call dynamic map");
-    nav_msgs::OccupancyGrid og = srv.response.map;
-    dynamic_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert);
-
-    dynamic_image_pub_.publish(dynamic_image->toImageMsg());
-  }
-  else
-  {
-    ROS_WARN("Failed to get dynamic map");
-    dynamic_image = static_image;
-  }
-
-  // two images (static (base) image and dynamic image)
-  // perimeter encoded as part of the alert and images aligned to alert perimeter
-
-  // use a single method that captures preprocessing and quantification
-  quirkd::AlertArray aa;
-  aa.alerts = quirkd::imagep::measureDifference(*static_image, *dynamic_image, &alert, &visualization_pub_);
-
-  ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
-  alert_pub_.publish(aa);
 }
 void SemiStaticMap::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
                                           const tf::StampedTransform tf)
