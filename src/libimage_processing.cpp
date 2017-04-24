@@ -25,7 +25,10 @@ namespace quirkd
 {
 namespace imagep
 {
-cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid) {
+void cvImageToGrid(cv_bridge::CvImagePtr ptr, nav_msgs::OccupancyGrid* grid) {
+  
+}
+cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
   nav_msgs::MapMetaData info = grid->info;
   float resolution = info.resolution;  // meters per pixel
   int cell_width = info.width;

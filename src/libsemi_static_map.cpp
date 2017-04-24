@@ -84,8 +84,8 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   }
   double common_resolution = original->info.resolution;
   // The maps are in the same frame (map?), the same resolution and oriented in the same direction
-  cv_bridge::CvImagePtr og_img = quirkd::imagep::gridToCroppedCvImage(original);
-  cv_bridge::CvImagePtr new_img = quirkd::imagep::gridToCroppedCvImage(new_section);
+  cv_bridge::CvImagePtr og_img = quirkd::imagep::gridToCvImage(original);
+  cv_bridge::CvImagePtr new_img = quirkd::imagep::gridToCvImage(new_section);
   cv::Rect og_rect = mapToRect(original);
   cv::Rect new_rect = mapToRect(new_section);
 
@@ -96,6 +96,9 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
     CV_8SC1,
     cv::Scalar(-1)
     );
+
+  cv_bridge::CvImagePtr both_ptr;
+  both_ptr->image = both_mat;
 
   // TODO visualize these changes with an image transport
   og_rect.x -= both_rect.x;
@@ -110,7 +113,7 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   cv::Mat new_dst = both_mat(new_rect);
   new_img->image.copyTo(new_dst);
 
-  matToMap(both_mat, original);
+  quirkd::imagep::cvImageToGrid(both_ptr, original);
   return true;
 }
 cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
@@ -120,9 +123,5 @@ cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
   float height = map->info.height * (map->info.resolution);
   cv::Rect toReturn(x, y, width, height);
   return toReturn;
-}
-void SemiStaticMap::matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map) {
-  // TODO implement
-
 }
 }  // namespace quirkd
