@@ -97,7 +97,18 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
     cv::Scalar(-1)
     );
 
-  // TODO place the other two maps into both_mat
+  // TODO visualize these changes with an image transport
+  og_rect.x -= both_rect.x;
+  og_rect.y -= both_rect.y;
+
+  cv::Mat og_dst = both_mat(og_rect);
+  og_img->image.copyTo(og_dst);
+
+  new_rect.x -= both_rect.x;
+  new_rect.y -= both_rect.y;
+
+  cv::Mat new_dst = both_mat(new_rect);
+  new_img->image.copyTo(new_dst);
 
   matToMap(both_mat, original);
   return true;
