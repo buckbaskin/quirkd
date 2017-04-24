@@ -107,8 +107,11 @@ cv::Mat SemiStaticMap::mapToMat(nav_msgs::OccupancyGrid* map) {
   return toReturn;
 }
 cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
-  // TODO implement
-  cv::Rect toReturn;
+  float x = map->info.origin.position.x;
+  float y = map->info.origin.position.y;
+  float width = map->info.width * (map->info.resolution);
+  float height = map->info.height * (map->info.resolution);
+  cv::Rect toReturn(x, y, width, height);
   return toReturn;
 }
 void SemiStaticMap::matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map) {
