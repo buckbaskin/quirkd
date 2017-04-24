@@ -103,10 +103,31 @@ def centroid_callback(msg):
     column = msg.data
     centroid_angle_radians = (A * column) + B
     distance = 0.0
+    global last_scan
     if last_scan is not None:
-        # TODO look at last scan and match nearest distance here
-        pass
-        rospy.loginfo('Match centroid to scan distance.')
+        '''
+        Centroid angle = angle_min + scan_index * angle_inc
+        ( Centroid angle - angle_min ) / angle_inc = scan_index
+        '''
+        scan_index = int((centroid_angle_radians - last_scan.angle_min) / last_scan.angle_increment)
+        average_this_many = 3
+
+        if scan_index < average_this_many // 2:
+            scan_index = average_this_many // 2
+        global last_scan
+        if scan_index > len(last_scan.ranges) - average_this_many // 2:
+            scan_index = len(last_scan.ranges) - average_this_many // 2
+
+        distance = (
+            sum(
+                last_scan.ranges[
+                    scan_index - average_this_many // 2 :
+                    scan_index + average_this_many // 2 + 1
+                ]
+            ) /
+            average_this_many
+        )
+
     else:
         rospy.loginfo('Cannot match centroid. Laser Scan not yet found.')
     publish_distance(distance, centroid_angle_radians)
