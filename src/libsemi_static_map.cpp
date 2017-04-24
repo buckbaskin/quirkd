@@ -25,9 +25,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nav_msgs/GetMap.h>
-#include <sensor_msgs/image_encodings.h>
-
 namespace quirkd
 {
 SemiStaticMap::SemiStaticMap(ros::NodeHandle nh) : n_(nh)
@@ -50,5 +47,21 @@ void SemiStaticMap::run()
     ros::spinOnce();
   }
   ROS_INFO("SemiStaticMap Node Exited.");
+}
+bool SemiStaticMap::setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res) {
+  map_ = req.map;
+  initial_pose_ = req.initial_pose;
+  res.success = true;
+  return true;
+}
+bool SemiStaticMap::updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res) {
+  map_ = req.map;
+  initial_pose_ = req.initial_pose;
+  res.success = true;
+  return true;
+}
+bool SemiStaticMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res) {
+  res.map = map_;
+  return true;
 }
 }  // namespace quirkd

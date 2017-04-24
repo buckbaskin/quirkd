@@ -68,8 +68,7 @@ add_service_files(
   DIRECTORY
   srv
   FILES
-  MapInfo.srv
-  MapUpdate.srv
+  UpdateMap.srv
   UserAction.srv
 )
 

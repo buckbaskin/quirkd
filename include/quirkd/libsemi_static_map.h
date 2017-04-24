@@ -24,11 +24,13 @@
 
 #include <ros/ros.h>
 
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <nav_msgs/GetMap.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/SetMap.h>
 #include <quirkd/Alert.h>
 #include <quirkd/AlertArray.h>
+#include <quirkd/UpdateMap.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
@@ -41,10 +43,15 @@ public:
   SemiStaticMap(ros::NodeHandle nh);
   ~SemiStaticMap();
   void run();
+  bool setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res);
+  bool updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res);
+  bool getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res);
 
 private:
   ros::NodeHandle n_;
   ros::ServiceClient static_map_client_;
+  nav_msgs::OccupancyGrid map_;
+  geometry_msgs::PoseWithCovarianceStamped initial_pose_;
 }; // class SemiStaticMap
 }  // namespace quirkd
 #endif  // QUIRKD_DATA_CONTROLLER_H
