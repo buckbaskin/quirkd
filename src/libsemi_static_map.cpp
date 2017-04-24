@@ -66,21 +66,22 @@ bool SemiStaticMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::Get
 
 bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section) {
   if (original->header.frame_id != new_section->header.frame_id) {
-    // TODO use transforms to align properly?
-    // TODO make sure those transforms are translation only for now
+    // TODO? use transforms to align properly?
+    // TODO? make sure those transforms are translation only for now
     return false;
   }
   if (original->info.resolution != new_section->info.resolution) {
-    // TODO make more educated checks and or use OpenCV to scale?
+    // TODO? make more educated checks and or use OpenCV to scale?
     return false;
   }
   if (original->info.origin.orientation.x != new_section->info.origin.orientation.x ||
     original->info.origin.orientation.y != new_section->info.origin.orientation.y ||
     original->info.origin.orientation.z != new_section->info.origin.orientation.z ||
     original->info.origin.orientation.w != new_section->info.origin.orientation.w) {
-    // TODO consider allowing rotational alignments in the future
+    // TODO? consider allowing rotational alignments in the future
     return false;
   }
+  double common_resolution = original->info.resolution;
   // The maps are in the same frame (map?), the same resolution and oriented in the same direction
   cv::Mat og_mat = mapToMat(original);
   cv::Mat new_mat = mapToMat(new_section);
@@ -88,20 +89,30 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   cv::Rect new_rect = mapToRect(new_section);
 
   cv::Rect both_rect = og_rect | new_rect;
-  cv::Mat both; // TODO create an image with default -1
+  cv::Mat both_mat(
+    both_rect.height / common_resolution,
+    both_rect.width / common_resolution,
+    CV_8SC1,
+    cv::Scalar(-1)
+    );
 
-  matToMap(both, original);
+  // TODO place the other two maps into both_mat
+
+  matToMap(both_mat, original);
   return true;
 }
 cv::Mat SemiStaticMap::mapToMat(nav_msgs::OccupancyGrid* map) {
+  // TODO implement
   cv::Mat toReturn;
   return toReturn;
 }
 cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
+  // TODO implement
   cv::Rect toReturn;
   return toReturn;
 }
 void SemiStaticMap::matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map) {
+  // TODO implement
 
 }
 }  // namespace quirkd
