@@ -24,6 +24,7 @@
 
 #include <ros/ros.h>
 
+#include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <nav_msgs/GetMap.h>
 #include <nav_msgs/OccupancyGrid.h>
@@ -54,6 +55,9 @@ private:
   geometry_msgs::PoseWithCovarianceStamped initial_pose_;
 
   bool mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section);
+  cv::Mat mapToMat(nav_msgs::OccupancyGrid* map);
+  cv::Rect mapToRect(nav_msgs::OccupancyGrid* map);
+  void matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map);
 }; // class SemiStaticMap
 }  // namespace quirkd
 #endif  // QUIRKD_SEMI_STATIC_MAP_H

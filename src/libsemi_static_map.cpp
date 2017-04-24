@@ -82,7 +82,26 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
     return false;
   }
   // The maps are in the same frame (map?), the same resolution and oriented in the same direction
-  
+  cv::Mat og_mat = mapToMat(original);
+  cv::Mat new_mat = mapToMat(new_section);
+  cv::Rect og_rect = mapToRect(original);
+  cv::Rect new_rect = mapToRect(new_section);
+
+  cv::Rect both_rect = og_rect | new_rect;
+  cv::Mat both; // TODO create an image with default -1
+
+  matToMap(both, original);
   return true;
+}
+cv::Mat SemiStaticMap::mapToMat(nav_msgs::OccupancyGrid* map) {
+  cv::Mat toReturn;
+  return toReturn;
+}
+cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
+  cv::Rect toReturn;
+  return toReturn;
+}
+void SemiStaticMap::matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map) {
+
 }
 }  // namespace quirkd

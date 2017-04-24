@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   message_generation
   nav_msgs
+  OpenCV REQUIRED
   sensor_msgs
   std_msgs
   tf
@@ -132,6 +133,7 @@ CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime vis
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   include
 )
 
@@ -152,7 +154,8 @@ add_library(
   libsemi_static_map src/libsemi_static_map.cpp
 )
 target_link_libraries(
-    libdata_controller
+    libsemi_static_map
+    ${OpenCV_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 add_library(
@@ -160,6 +163,7 @@ add_library(
 )
 target_link_libraries(
     libimage_processing
+    ${OpenCV_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 
