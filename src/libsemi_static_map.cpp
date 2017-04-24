@@ -65,6 +65,24 @@ bool SemiStaticMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::Get
 }
 
 bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section) {
+  if (original->header.frame_id != new_section->header.frame_id) {
+    // TODO use transforms to align properly?
+    // TODO make sure those transforms are translation only for now
+    return false;
+  }
+  if (original->info.resolution != new_section->info.resolution) {
+    // TODO make more educated checks and or use OpenCV to scale?
+    return false;
+  }
+  if (original->info.origin.orientation.x != new_section->info.origin.orientation.x ||
+    original->info.origin.orientation.y != new_section->info.origin.orientation.y ||
+    original->info.origin.orientation.z != new_section->info.origin.orientation.z ||
+    original->info.origin.orientation.w != new_section->info.origin.orientation.w) {
+    // TODO consider allowing rotational alignments in the future
+    return false;
+  }
+  // The maps are in the same frame (map?), the same resolution and oriented in the same direction
+  
   return true;
 }
 }  // namespace quirkd

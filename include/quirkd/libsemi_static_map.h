@@ -19,8 +19,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef QUIRKD_DATA_CONTROLLER_H
-#define QUIRKD_DATA_CONTROLLER_H
+#ifndef QUIRKD_SEMI_STATIC_MAP_H
+#define QUIRKD_SEMI_STATIC_MAP_H
 
 #include <ros/ros.h>
 
@@ -56,4 +56,4 @@ private:
   bool mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section);
 }; // class SemiStaticMap
 }  // namespace quirkd
-#endif  // QUIRKD_DATA_CONTROLLER_H
+#endif  // QUIRKD_SEMI_STATIC_MAP_H
