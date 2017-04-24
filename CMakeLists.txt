@@ -119,7 +119,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES libdata_controller libimage_processing
+LIBRARIES libdata_controller libimage_processing libsemi_static_map
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
@@ -144,6 +144,13 @@ include_directories(
 # )
 add_library(
   libdata_controller src/libdata_controller.cpp
+)
+target_link_libraries(
+    libdata_controller
+    ${catkin_LIBRARIES}
+)
+add_library(
+  libsemi_static_map src/libsemi_static_map.cpp
 )
 target_link_libraries(
     libdata_controller
@@ -180,6 +187,14 @@ target_link_libraries(
     data_controller_node
     libdata_controller
     libimage_processing
+    ${catkin_LIBRARIES}
+)
+add_executable(
+    semi_static_map_node src/semi_static_map.cpp
+)
+target_link_libraries(
+    semi_static_map_node
+    libsemi_static_map
     ${catkin_LIBRARIES}
 )
 add_executable(
