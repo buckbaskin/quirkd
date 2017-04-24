@@ -62,6 +62,7 @@ private:
   tf::TransformListener tf_;
 
   void updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan, const tf::StampedTransform tf);
+  void alertToRect(quirkd::Alert* alert, cv::Rect* r);
 };
 
 }  // namespace quirkd

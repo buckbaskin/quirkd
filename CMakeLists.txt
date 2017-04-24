@@ -155,6 +155,7 @@ add_library(
 )
 target_link_libraries(
     libsemi_static_map
+    libimage_processing
     ${OpenCV_LIBRARIES}
     ${catkin_LIBRARIES}
 )

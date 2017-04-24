@@ -37,7 +37,8 @@ namespace quirkd
 {
 namespace imagep
 {
-cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert);
+cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid);
+cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Rect* alert);
 void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert);
 std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original,
                                              std::vector<cv::Vec4i> new_edges);

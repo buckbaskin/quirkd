@@ -73,6 +73,8 @@ void DataController::update()
   alert.min_y = 0;
   alert.max_y = 1;
   updateAlertPerimeter(&alert, last_data, last_tf);
+  cv::Rect alert_rect;
+  alertToRect(&alert, &alert_rect);
 
   ROS_INFO("Update Data Processor");
   nav_msgs::GetMap srv;
@@ -82,7 +84,7 @@ void DataController::update()
   {
     ROS_DEBUG("Successfull call static map");
     nav_msgs::OccupancyGrid og = srv.response.map;
-    static_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert);
+    static_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
 
     static_image_pub_.publish(static_image->toImageMsg());
   }
@@ -94,7 +96,7 @@ void DataController::update()
   {
     ROS_DEBUG("Successfull call dynamic map");
     nav_msgs::OccupancyGrid og = srv.response.map;
-    dynamic_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert);
+    dynamic_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
 
     dynamic_image_pub_.publish(dynamic_image->toImageMsg());
   }
@@ -113,6 +115,17 @@ void DataController::update()
 
   ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
   alert_pub_.publish(aa);
+}
+void DataController::alertToRect(quirkd::Alert* alert, cv::Rect* r) {
+  alert->min_x;
+  alert->max_x;
+  alert->min_y;
+  alert->max_y;
+  // toReturn(x, y, width, height);
+  r->x = alert->min_x;
+  r->y = alert->min_y;
+  r->width = alert->max_x - alert->min_x;
+  r->height = alert->max_y - alert->min_y;
 }
 void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
                                           const tf::StampedTransform tf)

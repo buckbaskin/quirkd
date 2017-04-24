@@ -20,6 +20,7 @@
  * IN THE SOFTWARE.
  */
 #include <quirkd/libsemi_static_map.h>
+#include <quirkd/libimage_processing.h>
 
 #include <math.h>
 #include <stdint.h>
@@ -83,8 +84,8 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   }
   double common_resolution = original->info.resolution;
   // The maps are in the same frame (map?), the same resolution and oriented in the same direction
-  cv::Mat og_mat = mapToMat(original);
-  cv::Mat new_mat = mapToMat(new_section);
+  cv_bridge::CvImagePtr og_img = quirkd::imagep::gridToCroppedCvImage(original);
+  cv_bridge::CvImagePtr new_img = quirkd::imagep::gridToCroppedCvImage(new_section);
   cv::Rect og_rect = mapToRect(original);
   cv::Rect new_rect = mapToRect(new_section);
 
@@ -100,11 +101,6 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
 
   matToMap(both_mat, original);
   return true;
-}
-cv::Mat SemiStaticMap::mapToMat(nav_msgs::OccupancyGrid* map) {
-  // TODO implement
-  cv::Mat toReturn;
-  return toReturn;
 }
 cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
   float x = map->info.origin.position.x;
