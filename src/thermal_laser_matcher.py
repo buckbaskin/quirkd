@@ -29,6 +29,7 @@ column | angle (deg) | angle (rad)
 +90 deg -----[ ]----- -90 deg
 '''
 __conversion_factor = math.pi / 180
+# TODO Gather this data
 ANGLE_DEG_AT_COLUMN_160 = 15
 ANGLE_RAD_AT_COLUMN_160 = ANGLE_DEG_AT_COLUMN_160 * __conversion_factor
 ANGLE_DEG_AT_COLUMN_480 = -15
