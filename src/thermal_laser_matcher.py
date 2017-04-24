@@ -31,8 +31,6 @@ column | angle (deg) | angle (rad)
 __conversion_factor = math.pi / 180
 ANGLE_DEG_AT_COLUMN_160 = 15
 ANGLE_RAD_AT_COLUMN_160 = ANGLE_DEG_AT_COLUMN_160 * __conversion_factor
-ANGLE_DEG_AT_COLUMN_320 = 0
-ANGLE_RAD_AT_COLUMN_320 = ANGLE_DEG_AT_COLUMN_320 * __conversion_factor
 ANGLE_DEG_AT_COLUMN_480 = -15
 ANGLE_RAD_AT_COLUMN_480 = ANGLE_DEG_AT_COLUMN_480 * __conversion_factor
 '''
@@ -54,7 +52,7 @@ MinDistPublisher = None
 
 def publish_distance(dist, angle):
     # publishes r, theta, z = 0
-    rospy.loginfo('Match thermal dist. (%.2f, %.2f, 0.0)' % (dist, angle,))
+    rospy.loginfo('Match thermal dist. (%.2f, %.2f, 0.0)' % (dist, angle / math.pi * 180,))
     v = Vector3()
     v.x = dist
     v.y = angle
@@ -65,7 +63,7 @@ def publish_minimum_angle(dist, angle):
     '''
     Publish the distance, angle, z of the minimum laser scan distance
     '''
-    # rospy.loginfo('Match minimum scan angle. (%.2f, %.2f, 0.0)' % (dist, angle / math.pi * 180,))
+    rospy.loginfo('Match minimum scan angle. (%.2f, %.2f, 0.0)' % (dist, angle / math.pi * 180,))
     v = Vector3()
     v.x = dist
     v.y = angle
