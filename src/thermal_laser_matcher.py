@@ -41,24 +41,24 @@ B = ANGLE_RAD_AT_COLUMN_160 - (A * 160)
 
 last_scan = None
 
-VecPublisher = None
-FloatPublisher = None
+ThermalMatchPublisher = None
+MinDistPublisher = None
 
 def publish_distance(dist, angle):
     # publishes r, theta, z = 0
     v = Vector3()
     v.x = dist
     v.y = angle
-    if VecPublisher is not None:
-        VecPublisher.publish(v)
+    if ThermalMatchPublisher is not None:
+        ThermalMatchPublisher.publish(v)
 
 def publish_minimum_angle(dist, angle):
-    # publish the angle of the minimum laser scan distance
+    # publish the distance, angle, z of the minimum laser scan distance
     v = Vector3()
     v.x = dist
     v.y = angle
-    if VecPublisher is not None:
-        VecPublisher.publish(msg)
+    if MinDistPublisher is not None:
+        MinDistPublisher.publish(msg)
 
 def laser_callback(msg):
     # saves scan for matching to centroid
@@ -82,8 +82,6 @@ def laser_callback(msg):
 
     publish_minimum_angle(min_observed_dist, min_observed_angle)
 
-
-
 def centroid_callback(msg):
     column = msg.data
     centroid_angle_radians = (A * column) + B
@@ -92,3 +90,13 @@ def centroid_callback(msg):
         # TODO look at last scan and match nearest distance here
         pass
     publish_distance(distance, centroid_angle_radians)
+
+def listener():
+    rospy.init_node('thermal_laser_matcher')
+    rospy.Subscriber("/laser_scan", LaserScan, laser_callback)
+    rospy.Subscriber("/centroid", Float64, centroid_callback)
+    ThermalMatchPublisher = rospy.Publisher("/thermal_match", Vector3, queue_size=10)
+    MinDistPublisher = rospy.Publisher("/min_dist_to_scan", Vector3, queue_size=10)
+
+if __name__ == '__main__':
+    listener()
