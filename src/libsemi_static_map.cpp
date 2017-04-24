@@ -30,89 +30,25 @@
 
 namespace quirkd
 {
-SemiStaticMap::SemiStaticMap(ros::NodeHandle nh) : n_(nh), it_(n_)
+SemiStaticMap::SemiStaticMap(ros::NodeHandle nh) : n_(nh)
 {
-  alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/alert_array/notification", 1);
-  laser_sub_ = n_.subscribe("/base_scan", 1, &SemiStaticMap::laserScanCB, this);
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
   static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
-  ROS_INFO("WaitForService(\"dynamic_map\");");
-  ros::service::waitForService("dynamic_map");
-  dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
-  static_image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
-  dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
-  visualization_pub_ = it_.advertise("/quirkd/test/visualization", 1);
 }
 SemiStaticMap::~SemiStaticMap()
 {
   ROS_INFO("Destroying SemiStaticMap");
 }
-void SemiStaticMap::laserScanCB(const sensor_msgs::LaserScan msg)
+void SemiStaticMap::run()
 {
-  ROS_INFO("Laser Scan Callback");
-  last_data = msg;
-  try
+  ROS_INFO("SSM run");
+  ros::Rate r(30);
+
+  while (ros::ok())
   {
-    ROS_INFO("Waiting for transform");
-    tf_.waitForTransform("/map", "/base_laser_link", ros::Time::now(), ros::Duration(3.0));
-    tf_.lookupTransform("/map", "/base_laser_link", ros::Time::now(), last_tf);
-    ROS_INFO("tf success for /map to /base_laser_link");
+    ros::spinOnce();
   }
-  catch (tf::TransformException& ex)
-  {
-    ROS_WARN("tf fetch failed. %s", ex.what());
-  }
+  ROS_INFO("SemiStaticMap Node Exited.");
 }
-void SemiStaticMap::update()
-{
-  quirkd::Alert alert;
-  alert.level = 0;
-  alert.min_x = 0;
-  alert.max_x = 1;
-  alert.min_y = 0;
-  alert.max_y = 1;
-
-  ROS_INFO("Update Data Processor");
-}
-void SemiStaticMap::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
-                                          const tf::StampedTransform tf)
-{
-  double base_x = tf.getOrigin().x();
-  double base_y = tf.getOrigin().y();
-  double r, p, base_heading;
-  tf::Matrix3x3 m(tf.getRotation());
-  m.getRPY(r, p, base_heading);
-
-  double scan_min = base_heading + scan.angle_min;
-  double scan_inc = scan.angle_increment;
-  double heading = scan_min;
-
-  alert->min_x = base_x;
-  alert->max_x = base_x;
-  alert->min_y = base_y;
-  alert->max_y = base_y;
-
-  double live_x, live_y;
-
-  for (int i = 0; i < scan.ranges.size(); i++)
-  {
-    double dist = scan.ranges[i];
-
-    live_x = base_x + dist * cos(heading);
-    live_y = base_y + dist * sin(heading);
-    alert->min_x = std::min(live_x, double(alert->min_x));
-    alert->max_x = std::max(live_x, double(alert->max_x));
-    alert->min_y = std::min(live_y, double(alert->min_y));
-    alert->max_y = std::max(live_y, double(alert->max_y));
-
-    heading += scan_inc;
-  }
-  double padding = 0.5;
-  alert->min_x += -padding;
-  alert->min_y += -padding;
-  alert->max_x += padding;
-  alert->max_y += padding;
-}
-
 }  // namespace quirkd

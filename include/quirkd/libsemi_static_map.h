@@ -24,8 +24,6 @@
 
 #include <ros/ros.h>
 
-#include <quirkd/libimage_processing.h>
-
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <nav_msgs/OccupancyGrid.h>
@@ -42,27 +40,11 @@ class SemiStaticMap
 public:
   SemiStaticMap(ros::NodeHandle nh);
   ~SemiStaticMap();
-  void laserScanCB(const sensor_msgs::LaserScan msg);
-  void update();
+  void run();
 
 private:
   ros::NodeHandle n_;
-  ros::Publisher alert_pub_;
-  ros::Subscriber laser_sub_;
-  ros::ServiceClient dynamic_map_client_;
   ros::ServiceClient static_map_client_;
-
-  image_transport::ImageTransport it_;
-  image_transport::Publisher static_image_pub_;
-  image_transport::Publisher dynamic_image_pub_;
-  image_transport::Publisher visualization_pub_;
-
-  sensor_msgs::LaserScan last_data;
-  tf::StampedTransform last_tf;
-  tf::TransformListener tf_;
-
-  void updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan, const tf::StampedTransform tf);
-};
-
+}; // class SemiStaticMap
 }  // namespace quirkd
 #endif  // QUIRKD_DATA_CONTROLLER_H
