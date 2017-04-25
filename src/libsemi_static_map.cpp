@@ -28,11 +28,15 @@
 
 namespace quirkd
 {
-SemiStaticMap::SemiStaticMap(ros::NodeHandle nh) : n_(nh)
+SemiStaticMap::SemiStaticMap(ros::NodeHandle nh) : n_(nh), it_(nh)
 {
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
   static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
+
+  original_image_pub_ = it_.advertise("/quirkd/test/original_map", 1);
+  new_section_image_pub_ = it_.advertise("/quirkd/test/new_section", 1);
+  combined_pub_ = it_.advertise("/quirkd/test/combined", 1);
 }
 SemiStaticMap::~SemiStaticMap()
 {
@@ -85,7 +89,10 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   double common_resolution = original->info.resolution;
   // The maps are in the same frame (map?), the same resolution and oriented in the same direction
   cv_bridge::CvImagePtr og_img = quirkd::imagep::gridToCvImage(original);
+  original_image_pub_.publish(og_img->toImageMsg());
   cv_bridge::CvImagePtr new_img = quirkd::imagep::gridToCvImage(new_section);
+  new_section_image_pub_.publish(new_img->toImageMsg());
+
   cv::Rect og_rect = mapToRect(original);
   cv::Rect new_rect = mapToRect(new_section);
 
@@ -99,8 +106,7 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
 
   cv_bridge::CvImagePtr both_ptr;
   both_ptr->image = both_mat;
-
-  // TODO visualize these changes with an image transport
+  
   og_rect.x -= both_rect.x;
   og_rect.y -= both_rect.y;
 
@@ -112,6 +118,8 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
 
   cv::Mat new_dst = both_mat(new_rect);
   new_img->image.copyTo(new_dst);
+
+  combined_pub_.publish(both_ptr->toImageMsg());
 
   quirkd::imagep::cvImageToGrid(both_ptr, original);
   return true;

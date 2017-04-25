@@ -26,6 +26,7 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <image_transport/image_transport.h>
 #include <nav_msgs/GetMap.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/SetMap.h>
@@ -53,6 +54,11 @@ private:
   ros::ServiceClient static_map_client_;
   nav_msgs::OccupancyGrid map_;
   geometry_msgs::PoseWithCovarianceStamped initial_pose_;
+
+  image_transport::ImageTransport it_;
+  image_transport::Publisher original_image_pub_;
+  image_transport::Publisher new_section_image_pub_;
+  image_transport::Publisher combined_pub_;
 
   bool mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section);
   cv::Mat mapToMat(nav_msgs::OccupancyGrid* map);
