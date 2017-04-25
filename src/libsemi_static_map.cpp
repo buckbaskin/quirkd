@@ -45,6 +45,18 @@ SemiStaticMap::~SemiStaticMap()
 void SemiStaticMap::run()
 {
   ROS_INFO("SSM run");
+
+  nav_msgs::GetMap srv;
+  if (static_map_client_.call(srv))
+  {
+    ROS_DEBUG("Successfull call static map");
+    map_ = srv.response.map;
+  }
+  else
+  {
+    ROS_ERROR("Failed to get static map");
+  }
+
   ros::Rate r(30);
 
   while (ros::ok())
