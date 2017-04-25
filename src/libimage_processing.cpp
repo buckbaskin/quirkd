@@ -25,7 +25,51 @@ namespace quirkd
 {
 namespace imagep
 {
-cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd::Alert* alert)
+void cvImageToGrid(cv_bridge::CvImagePtr ptr, nav_msgs::OccupancyGrid* grid) {
+  
+}
+cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
+  nav_msgs::MapMetaData info = grid->info;
+  float resolution = info.resolution;  // meters per pixel
+  int cell_width = info.width;
+  int cell_height = info.height;
+  float origin_x = info.origin.position.x;
+  float origin_y = info.origin.position.x;
+  /*
+   * From documentation:
+   * The map data in row major order, starting at 0,0.
+   * Valid values are in the range [0, 100]
+   */
+  std::vector<int8_t> data = grid->data;
+  std::vector<uint8_t> unsigned_data;
+  unsigned_data.resize(data.size());  // allocate and fill vector to match num elements of data
+
+  for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++)
+  {
+    int8_t old_int = data[i];
+    // assume unknown values (signed -1) are just 0
+    // assumption is that unseen parts of the map have no obstacles until proven otherwise
+    uint8_t new_int = (uint8_t)((old_int == -1) ? 0 : old_int);
+    unsigned_data[(std::vector<uint8_t>::size_type)i] = new_int;
+  }
+
+  // Create the ROS Image Message
+
+  sensor_msgs::Image converted_image;
+  converted_image.width = cell_width;
+  converted_image.height = cell_height;
+  converted_image.encoding = sensor_msgs::image_encodings::MONO8;
+
+  converted_image.step = cell_width;
+  converted_image.data = unsigned_data;
+
+  int map_cell_origin_x = (int)(origin_x / resolution);  // pixels
+  int map_cell_origin_y = (int)(origin_y / resolution);  // pixels
+
+  cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
+  return gridToCroppedCvImage(grid, &map_region);
+}
+cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Rect* alert)
 {
   // Unpack the Occupancy Grid
 
@@ -93,10 +137,10 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, quirkd
   cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
   ROS_DEBUG("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
 
-  int p_cell_origin_x = (int)(alert->min_x / resolution);                // pixels
-  int p_cell_origin_y = (int)(alert->min_y / resolution);                // pixels
-  int perim_width = (int)((alert->max_x - alert->min_x) / resolution);   // pixels
-  int perim_height = (int)((alert->max_y - alert->min_y) / resolution);  // pixels
+  int p_cell_origin_x = (int)(alert->x / resolution);                // pixels
+  int p_cell_origin_y = (int)(alert->y / resolution);                // pixels
+  int perim_width = (int)(alert->width / resolution);   // pixels
+  int perim_height = (int)(alert->height / resolution);  // pixels
   ROS_DEBUG("perim w: %d h: %d", perim_width, perim_height);
 
   cv::Rect perimeter(p_cell_origin_x, p_cell_origin_y, perim_width, perim_height);

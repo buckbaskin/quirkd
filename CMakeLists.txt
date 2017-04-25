@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   message_generation
   nav_msgs
+  OpenCV REQUIRED
   sensor_msgs
   std_msgs
   tf
@@ -68,8 +69,7 @@ add_service_files(
   DIRECTORY
   srv
   FILES
-  MapInfo.srv
-  MapUpdate.srv
+  UpdateMap.srv
   UserAction.srv
 )
 
@@ -119,7 +119,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES libdata_controller libimage_processing
+LIBRARIES libdata_controller libimage_processing libsemi_static_map
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
@@ -133,6 +133,7 @@ CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime vis
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   include
 )
 
@@ -150,10 +151,20 @@ target_link_libraries(
     ${catkin_LIBRARIES}
 )
 add_library(
+  libsemi_static_map src/libsemi_static_map.cpp
+)
+target_link_libraries(
+    libsemi_static_map
+    libimage_processing
+    ${OpenCV_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_library(
   libimage_processing src/libimage_processing.cpp
 )
 target_link_libraries(
     libimage_processing
+    ${OpenCV_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 
@@ -180,6 +191,14 @@ target_link_libraries(
     data_controller_node
     libdata_controller
     libimage_processing
+    ${catkin_LIBRARIES}
+)
+add_executable(
+    semi_static_map_node src/semi_static_map.cpp
+)
+target_link_libraries(
+    semi_static_map_node
+    libsemi_static_map
     ${catkin_LIBRARIES}
 )
 add_executable(

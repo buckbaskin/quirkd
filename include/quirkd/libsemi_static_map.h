@@ -19,51 +19,51 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef QUIRKD_DATA_CONTROLLER_H
-#define QUIRKD_DATA_CONTROLLER_H
+#ifndef QUIRKD_SEMI_STATIC_MAP_H
+#define QUIRKD_SEMI_STATIC_MAP_H
 
 #include <ros/ros.h>
 
-#include <quirkd/libimage_processing.h>
-
 #include <cv_bridge/cv_bridge.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <image_transport/image_transport.h>
+#include <nav_msgs/GetMap.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/SetMap.h>
 #include <quirkd/Alert.h>
 #include <quirkd/AlertArray.h>
+#include <quirkd/UpdateMap.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 
 namespace quirkd
 {
-class DataController
+class SemiStaticMap
 {
 public:
-  DataController(ros::NodeHandle nh);
-  ~DataController();
-  void laserScanCB(const sensor_msgs::LaserScan msg);
-  void update();
+  SemiStaticMap(ros::NodeHandle nh);
+  ~SemiStaticMap();
+  void run();
+  bool setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res);
+  bool updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res);
+  bool getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res);
 
 private:
   ros::NodeHandle n_;
-  ros::Publisher alert_pub_;
-  ros::Subscriber laser_sub_;
-  ros::ServiceClient dynamic_map_client_;
   ros::ServiceClient static_map_client_;
+  nav_msgs::OccupancyGrid map_;
+  geometry_msgs::PoseWithCovarianceStamped initial_pose_;
 
   image_transport::ImageTransport it_;
-  image_transport::Publisher static_image_pub_;
-  image_transport::Publisher dynamic_image_pub_;
-  image_transport::Publisher visualization_pub_;
+  image_transport::Publisher original_image_pub_;
+  image_transport::Publisher new_section_image_pub_;
+  image_transport::Publisher combined_pub_;
 
-  sensor_msgs::LaserScan last_data;
-  tf::StampedTransform last_tf;
-  tf::TransformListener tf_;
-
-  void updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan, const tf::StampedTransform tf);
-  void alertToRect(quirkd::Alert* alert, cv::Rect* r);
-};
-
+  bool mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section);
+  cv::Mat mapToMat(nav_msgs::OccupancyGrid* map);
+  cv::Rect mapToRect(nav_msgs::OccupancyGrid* map);
+  void matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map);
+}; // class SemiStaticMap
 }  // namespace quirkd
-#endif  // QUIRKD_DATA_CONTROLLER_H
+#endif  // QUIRKD_SEMI_STATIC_MAP_H
