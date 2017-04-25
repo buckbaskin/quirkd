@@ -57,6 +57,7 @@ void SemiStaticMap::run()
     ROS_ERROR("Failed to get static map");
   }
 
+  ROS_INFO("SSM loop");
   ros::Rate r(30);
 
   while (ros::ok())
