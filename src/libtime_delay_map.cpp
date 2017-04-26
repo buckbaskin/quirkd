@@ -57,7 +57,7 @@ void TimeDelayMap::run()
       while ( (int) (map_queue_.size())  > hz) {
         map_queue_.pop_front();
       }
-      ROS_INFO("Successfull call dynamic_map %d", (int) (map_queue_.size()));
+      ROS_DEBUG("Successfull call dynamic_map %d", (int) (map_queue_.size()));
     }
     else
     {

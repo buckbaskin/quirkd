@@ -32,7 +32,7 @@ namespace quirkd
 {
 DataController::DataController(ros::NodeHandle nh) : n_(nh), it_(n_)
 {
-  alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/alert_array/notification", 1);
+  alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/"+ros::this_node::getName()+"/alert_array", 1);
   laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
@@ -40,9 +40,9 @@ DataController::DataController(ros::NodeHandle nh) : n_(nh), it_(n_)
   ROS_INFO("WaitForService(\"dynamic_map\");");
   ros::service::waitForService("dynamic_map");
   dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
-  static_image_pub_ = it_.advertise("/quirkd/test/static_image", 1);
-  dynamic_image_pub_ = it_.advertise("/quirkd/test/dynamic_image", 1);
-  visualization_pub_ = it_.advertise("/quirkd/test/visualization", 1);
+  static_image_pub_ = it_.advertise("/quirkd/"+ros::this_node::getName()+"/static_image", 1);
+  dynamic_image_pub_ = it_.advertise("/quirkd/"+ros::this_node::getName()+"/dynamic_image", 1);
+  visualization_pub_ = it_.advertise("/quirkd/"+ros::this_node::getName()+"/visualization", 1);
 }
 DataController::~DataController()
 {
