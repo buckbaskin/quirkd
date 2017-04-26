@@ -119,7 +119,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES libdata_controller libimage_processing libsemi_static_map
+LIBRARIES libdata_controller libimage_processing libsemi_static_map libtime_delay_map
 CATKIN_DEPENDS nav_msgs roscpp rospy sensor_msgs std_msgs tf message_runtime visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
@@ -155,6 +155,15 @@ add_library(
 )
 target_link_libraries(
     libsemi_static_map
+    libimage_processing
+    ${OpenCV_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_library(
+  libtime_delay_map src/libtime_delay_map.cpp
+)
+target_link_libraries(
+    libtime_delay_map
     libimage_processing
     ${OpenCV_LIBRARIES}
     ${catkin_LIBRARIES}
@@ -199,6 +208,14 @@ add_executable(
 target_link_libraries(
     semi_static_map_node
     libsemi_static_map
+    ${catkin_LIBRARIES}
+)
+add_executable(
+    time_delay_map_node src/time_delay_map.cpp
+)
+target_link_libraries(
+    time_delay_map_node
+    libtime_delay_map
     ${catkin_LIBRARIES}
 )
 add_executable(

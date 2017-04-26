@@ -33,6 +33,9 @@ SemiStaticMap::SemiStaticMap(ros::NodeHandle nh) : n_(nh), it_(nh)
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
   static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
+  set_map_server_ = n_.advertiseService("/quirkd/ssm/set", &SemiStaticMap::setMapCallback, this);
+  update_map_server_ = n_.advertiseService("/quirkd/ssm/update", &SemiStaticMap::updateMapCallback, this);
+  get_map_server_ = n_.advertiseService("/quirkd/ssm/get", &SemiStaticMap::getMapCallback, this);
 
   original_image_pub_ = it_.advertise("/quirkd/test/original_map", 1);
   new_section_image_pub_ = it_.advertise("/quirkd/test/new_section", 1);

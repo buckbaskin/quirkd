@@ -19,8 +19,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef QUIRKD_SEMI_STATIC_MAP_H
-#define QUIRKD_SEMI_STATIC_MAP_H
+#ifndef QUIRKD_TIME_DELAY_MAP_H
+#define QUIRKD_TIME_DELAY_MAP_H
 
 #include <ros/ros.h>
 
@@ -39,34 +39,21 @@
 
 namespace quirkd
 {
-class SemiStaticMap
+class TimeDelayMap
 {
 public:
-  SemiStaticMap(ros::NodeHandle nh);
-  ~SemiStaticMap();
-  void run();
-  bool setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res);
-  bool updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res);
+  TimeDelayMap(ros::NodeHandle nh);
+  ~TimeDelayMap();
+  void run(); // collect 4 maps a sec, return the one that is 1 sec old
   bool getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res);
 
 private:
   ros::NodeHandle n_;
-  ros::ServiceClient static_map_client_;
-  ros::ServiceServer set_map_server_;
-  ros::ServiceServer update_map_server_;
+  ros::ServiceClient dynamic_map_client_;
   ros::ServiceServer get_map_server_;
-  nav_msgs::OccupancyGrid map_;
-  geometry_msgs::PoseWithCovarianceStamped initial_pose_;
+  int hz;
 
-  image_transport::ImageTransport it_;
-  image_transport::Publisher original_image_pub_;
-  image_transport::Publisher new_section_image_pub_;
-  image_transport::Publisher combined_pub_;
-
-  bool mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section);
-  cv::Mat mapToMat(nav_msgs::OccupancyGrid* map);
-  cv::Rect mapToRect(nav_msgs::OccupancyGrid* map);
-  void matToMap(cv::Mat as_img, nav_msgs::OccupancyGrid* map);
-}; // class SemiStaticMap
+  std::deque<nav_msgs::OccupancyGrid> map_queue_;
+}; // class TimeDelayMap
 }  // namespace quirkd
-#endif  // QUIRKD_SEMI_STATIC_MAP_H
+#endif  // QUIRKD_TIME_DELAY_MAP_H

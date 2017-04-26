@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="quirkd" name="dc_static" type="data_controller_node" output="screen" args="static_map:=static_map dynamic_map:=dynamic_map">
+    </node>
+</launch>

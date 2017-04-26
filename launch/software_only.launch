@@ -1,6 +1,7 @@
 <launch>
 	<include file="$(find quirkd)/launch/test_sim.launch"></include>
 	<include file="$(find quirkd)/launch/model.launch"></include>
-	<!-- <include file="$(find quirkd)/launch/controller.launch"></include> -->
+	<include file="$(find quirkd)/launch/controller_static_dynamic.launch"></include>
+	<include file="$(find quirkd)/launch/controller_delay_dynamic.launch"></include>
 	<include file="$(find quirkd)/launch/gui.launch"></include>
 </launch>
