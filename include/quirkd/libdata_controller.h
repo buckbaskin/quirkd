@@ -53,8 +53,6 @@ private:
   ros::ServiceClient static_map_client_;
 
   image_transport::ImageTransport it_;
-  image_transport::Publisher static_image_pub_;
-  image_transport::Publisher dynamic_image_pub_;
   image_transport::Publisher visualization_pub_;
 
   sensor_msgs::LaserScan last_data;

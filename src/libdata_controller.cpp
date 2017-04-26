@@ -40,8 +40,6 @@ DataController::DataController(ros::NodeHandle nh) : n_(nh), it_(n_)
   ROS_INFO("WaitForService(\"dynamic_map\");");
   ros::service::waitForService("dynamic_map");
   dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
-  static_image_pub_ = it_.advertise("/quirkd/" + ros::this_node::getName() + "/static_image", 1);
-  dynamic_image_pub_ = it_.advertise("/quirkd/" + ros::this_node::getName() + "/dynamic_image", 1);
   visualization_pub_ = it_.advertise("/quirkd/" + ros::this_node::getName() + "/visualization", 1);
 }
 DataController::~DataController()
@@ -85,8 +83,6 @@ void DataController::update()
     ROS_DEBUG("Successfull call static map");
     nav_msgs::OccupancyGrid og = srv.response.map;
     static_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
-
-    static_image_pub_.publish(static_image->toImageMsg());
   }
   else
   {
@@ -97,8 +93,6 @@ void DataController::update()
     ROS_DEBUG("Successfull call dynamic map");
     nav_msgs::OccupancyGrid og = srv.response.map;
     dynamic_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
-
-    dynamic_image_pub_.publish(dynamic_image->toImageMsg());
   }
   else
   {
