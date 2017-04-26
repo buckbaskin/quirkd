@@ -50,11 +50,11 @@ The backing data abstractions
 
 ## `model_free.launch`
 
-The backing data abstractions
+The backing data abstractions without the static map
 
 ### Runs
 - `gmapping` (dynamic map)
-- `TimeDelayMap` (static map option 2)
+- `TimeDelayMap` ("static" map)
 
 ## `test_sim.launch`
 
