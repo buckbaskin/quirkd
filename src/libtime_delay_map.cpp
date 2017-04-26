@@ -44,7 +44,9 @@ void TimeDelayMap::run()
 {
   ROS_INFO("TDM run");
 
-  ros::Rate r(5);
+  const int hz = 5;
+
+  ros::Rate r(hz);
 
   while (ros::ok())
   {
@@ -53,7 +55,10 @@ void TimeDelayMap::run()
     if (static_map_client_.call(srv))
     {
       ROS_DEBUG("Successfull call static map");
-      map_ = srv.response.map;
+      map_queue_.push_back(srv.response.map);
+      while ( (int) (map_queue_.size(hz))  > hz) {
+        map_queue_.pop_front();
+      }
     }
     else
     {
@@ -63,7 +68,10 @@ void TimeDelayMap::run()
   ROS_INFO("TimeDelayMap Node Exited.");
 }
 bool TimeDelayMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res) {
-  res.map = map_;
-  return true;
+  if (map_queue_.size() > 0) {
+    res.map = map_queue_.front();
+    return true;
+  }
+  return false;
 }
 }  // namespace quirkd

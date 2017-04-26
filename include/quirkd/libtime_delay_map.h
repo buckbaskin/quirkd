@@ -52,6 +52,7 @@ private:
   ros::ServiceClient static_map_client_;
   ros::ServiceServer get_map_server_;
   nav_msgs::OccupancyGrid map_;
+  std::deque<nav_msgs::OccupancyGrid> map_queue_;
   geometry_msgs::PoseWithCovarianceStamped initial_pose_;
 }; // class TimeDelayMap
 }  // namespace quirkd
