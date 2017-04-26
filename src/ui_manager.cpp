@@ -28,7 +28,7 @@ UIManager::UIManager(ros::NodeHandle nh) : n_(nh)
   // low_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
   // warn_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
   // max_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
-  line_pub_ = n_.advertise<visualization_msgs::Marker>("/max_line_alert", 1);
+  line_pub_ = n_.advertise<visualization_msgs::Marker>("/quirkd/"+ros::this_node::getName()+"/max_line_alert", 1);
   alert_sub_ = n_.subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
   alertArray_sub_ = n_.subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
   ROS_INFO("Done with UIManager constructor");

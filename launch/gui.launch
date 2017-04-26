@@ -3,7 +3,13 @@
   <!-- Launch rviz -->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quirkd)/rviz/UIConfig.rviz"/>
 
-  <node pkg="quirkd" name="ui_manager" type="ui_manager" output="screen">
+  <!-- Launch 2 UIManagers tied to one DataController each -->
+  <node pkg="quirkd" name="uim_delay" type="ui_manager" output="screen"
+  args="quirkd/alert_array/notification:=/quirkd/dc_delay/alert_array">
+  </node>
+
+  <node pkg="quirkd" name="uim_static" type="ui_manager" output="screen"
+  args="quirkd/alert_array/notification:=/quirkd/dc_static/alert_array">
   </node>
 
 </launch>
