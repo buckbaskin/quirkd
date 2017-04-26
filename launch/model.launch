@@ -3,4 +3,6 @@
     </node>
     <node pkg="quirkd" name="dynamicMapModel" type="gmapping.sh" output="screen">
     </node>
+    <node pkg="quirkd" name="timeDelayMap" type="time_delay_map_node" output="screen">
+    </node>
 </launch>
