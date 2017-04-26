@@ -30,10 +30,10 @@ namespace quirkd
 {
 TimeDelayMap::TimeDelayMap(ros::NodeHandle nh) : n_(nh)
 {
-  ROS_INFO("WaitForService(\"static_map\");");
-  ros::service::waitForService("static_map");
+  ROS_INFO("WaitForService(\"dynamic_map\");");
+  ros::service::waitForService("dynamic_map");
   hz = 5;
-  static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
+  dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
   get_map_server_ = n_.advertiseService("/quirkd/ssm/get", &TimeDelayMap::getMapCallback, this);
 
 }
@@ -51,9 +51,9 @@ void TimeDelayMap::run()
   {
     ros::spinOnce();
     nav_msgs::GetMap srv;
-    if (static_map_client_.call(srv))
+    if (dynamic_map_client_.call(srv))
     {
-      ROS_DEBUG("Successfull call static map");
+      ROS_DEBUG("Successfull call dynamic map");
       map_queue_.push_back(srv.response.map);
       while ( (int) (map_queue_.size())  > hz) {
         map_queue_.pop_front();
@@ -61,7 +61,7 @@ void TimeDelayMap::run()
     }
     else
     {
-      ROS_ERROR("Failed to get static map");
+      ROS_ERROR("Failed to get dynamic map");
     }
   }
   ROS_INFO("TimeDelayMap Node Exited.");
