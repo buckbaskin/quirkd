@@ -49,7 +49,7 @@ public:
 
 private:
   ros::NodeHandle n_;
-  ros::ServiceClient static_map_client_;
+  ros::ServiceClient dynamic_map_client_;
   ros::ServiceServer get_map_server_;
   int hz;
 
