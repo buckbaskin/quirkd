@@ -108,7 +108,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /quirkd/ui_manager_1/max_line_alert
+      Marker Topic: /quirkd/uim_static/max_line_alert
       Name: SD Max Line Alert
       Namespaces:
         "": true
@@ -128,7 +128,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /quirkd/ui_manager_2/max_line_alert
+      Marker Topic: /quirkd/uim_delay/max_line_alert
       Name: DD Max Line Alert
       Namespaces:
         "": true
