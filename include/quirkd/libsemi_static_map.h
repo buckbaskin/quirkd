@@ -52,6 +52,9 @@ public:
 private:
   ros::NodeHandle n_;
   ros::ServiceClient static_map_client_;
+  ros::ServiceServer set_map_server_;
+  ros::ServiceServer update_map_server_;
+  ros::ServiceServer get_map_server_;
   nav_msgs::OccupancyGrid map_;
   geometry_msgs::PoseWithCovarianceStamped initial_pose_;
 
