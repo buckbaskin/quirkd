@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="quirkd" name="data_controller" type="data_controller" output="screen"
+    args="static_map:=quirkd/tdm/get dynamic_map:=dynamic_map">
+    </node>
+</launch>

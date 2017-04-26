@@ -34,7 +34,7 @@ TimeDelayMap::TimeDelayMap(ros::NodeHandle nh) : n_(nh)
   ros::service::waitForService("dynamic_map");
   hz = 5;
   dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
-  get_map_server_ = n_.advertiseService("/quirkd/ssm/get", &TimeDelayMap::getMapCallback, this);
+  get_map_server_ = n_.advertiseService("/quirkd/tdm/get", &TimeDelayMap::getMapCallback, this);
 
 }
 TimeDelayMap::~TimeDelayMap()
