@@ -25,10 +25,11 @@ namespace quirkd
 {
 namespace imagep
 {
-void cvImageToGrid(cv_bridge::CvImagePtr ptr, nav_msgs::OccupancyGrid* grid) {
-  
+void cvImageToGrid(cv_bridge::CvImagePtr ptr, nav_msgs::OccupancyGrid* grid)
+{
 }
-cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
+cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid)
+{
   nav_msgs::MapMetaData info = grid->info;
   float resolution = info.resolution;  // meters per pixel
   int cell_width = info.width;
@@ -137,9 +138,9 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
   ROS_DEBUG("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
 
-  int p_cell_origin_x = (int)(alert->x / resolution);                // pixels
-  int p_cell_origin_y = (int)(alert->y / resolution);                // pixels
-  int perim_width = (int)(alert->width / resolution);   // pixels
+  int p_cell_origin_x = (int)(alert->x / resolution);    // pixels
+  int p_cell_origin_y = (int)(alert->y / resolution);    // pixels
+  int perim_width = (int)(alert->width / resolution);    // pixels
   int perim_height = (int)(alert->height / resolution);  // pixels
   ROS_DEBUG("perim w: %d h: %d", perim_width, perim_height);
 
@@ -201,13 +202,11 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   cv_ptr->image = base;
   return cv_ptr;
 }
-void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert) {
-
+void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert)
+{
 }
-std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
-                                              cv::Mat* dynamic_processed,
-                                              quirkd::Alert* alert,
-                                              image_transport::Publisher* visualization_pub)
+std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed,
+                                              quirkd::Alert* alert, image_transport::Publisher* visualization_pub)
 {
   /* Compute difference
    * Steps:
@@ -277,8 +276,7 @@ std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
   std::vector<quirkd::Alert> alerts = minimizeAlerts(unmatched_static, unmatched_dynamic, alert);
   return alerts;
 }
-std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original,
-                                                             std::vector<cv::Vec4i> new_edges)
+std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges)
 {
   std::vector<cv::Vec4i> unmatched_set;
   const double limit = 1000;
@@ -330,8 +328,7 @@ double distance_measure(int start_x, int start_y, int end_x, int end_y)
   return pow(start_x - end_x, 2) + pow(start_y - end_y, 2);
 }
 std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
-                                                          std::vector<cv::Vec4i> unmatched_dynamic,
-                                                          quirkd::Alert* alert_msg)
+                                          std::vector<cv::Vec4i> unmatched_dynamic, quirkd::Alert* alert_msg)
 {
   std::vector<quirkd::Alert> alerts;
   float map_resolution = 0.05;  // meters per cell/pixel
@@ -389,15 +386,14 @@ std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_stati
   }
   return alerts;
 }
-std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
-                                             cv_bridge::CvImage dynamic_image,
-                                             quirkd::Alert* alert,
-                                             image_transport::Publisher* visualization_pub)
+std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image,
+                                             quirkd::Alert* alert, image_transport::Publisher* visualization_pub)
 {
   quirkd::imagep::preprocessImages(&(static_image.image), &(dynamic_image.image), alert);
-  std::vector<quirkd::Alert> result = quantifyDifference(&(static_image.image), &(dynamic_image.image), alert, visualization_pub);
+  std::vector<quirkd::Alert> result =
+      quantifyDifference(&(static_image.image), &(dynamic_image.image), alert, visualization_pub);
   return result;
 }
 
-} // namespace imagep
-} // namespace quirkd
+}  // namespace imagep
+}  // namespace quirkd

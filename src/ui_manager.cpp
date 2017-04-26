@@ -28,7 +28,7 @@ UIManager::UIManager(ros::NodeHandle nh) : n_(nh)
   // low_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/low_alert", 1);
   // warn_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/warn_alert", 1);
   // max_pub_ = n_.advertise<geometry_msgs::PolygonStamped>("/max_alert", 1);
-  line_pub_ = n_.advertise<visualization_msgs::Marker>("/quirkd/"+ros::this_node::getName()+"/max_line_alert", 1);
+  line_pub_ = n_.advertise<visualization_msgs::Marker>("/quirkd/" + ros::this_node::getName() + "/max_line_alert", 1);
   alert_sub_ = n_.subscribe("/quirkd/alert/notification", 1, &UIManager::alertCB, this);
   alertArray_sub_ = n_.subscribe("/quirkd/alert_array/notification", 1, &UIManager::alertArrayCB, this);
   ROS_INFO("Done with UIManager constructor");
@@ -58,16 +58,18 @@ void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
     quirkd::Alert alert = msg.alerts[i];
     extendLineList(&points, &alert);
   }
-  ROS_INFO("Alert Array publishLineList %d", (int) points.size());
+  ROS_INFO("Alert Array publishLineList %d", (int)points.size());
   publishLineList(&line_pub_, &points);
 }
 void UIManager::extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg)
 {
-  if (msg->max_x - msg->min_x < 0.1) {
+  if (msg->max_x - msg->min_x < 0.1)
+  {
     msg->max_x += 0.05;
     msg->min_x -= 0.05;
   }
-  if (msg->max_y - msg->min_y < 0.1) {
+  if (msg->max_y - msg->min_y < 0.1)
+  {
     msg->max_y += 0.05;
     msg->min_y -= 0.05;
   }
