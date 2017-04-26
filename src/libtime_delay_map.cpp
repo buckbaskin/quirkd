@@ -32,6 +32,7 @@ TimeDelayMap::TimeDelayMap(ros::NodeHandle nh) : n_(nh)
 {
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
+  hz = 5;
   static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
   get_map_server_ = n_.advertiseService("/quirkd/ssm/get", &TimeDelayMap::getMapCallback, this);
 
@@ -44,8 +45,6 @@ void TimeDelayMap::run()
 {
   ROS_INFO("TDM run");
 
-  const int hz = 5;
-
   ros::Rate r(hz);
 
   while (ros::ok())
@@ -56,7 +55,7 @@ void TimeDelayMap::run()
     {
       ROS_DEBUG("Successfull call static map");
       map_queue_.push_back(srv.response.map);
-      while ( (int) (map_queue_.size(hz))  > hz) {
+      while ( (int) (map_queue_.size())  > hz) {
         map_queue_.pop_front();
       }
     }
@@ -68,10 +67,13 @@ void TimeDelayMap::run()
   ROS_INFO("TimeDelayMap Node Exited.");
 }
 bool TimeDelayMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res) {
-  if (map_queue_.size() > 0) {
-    res.map = map_queue_.front();
-    return true;
+  if (map_queue_.size() <= 0) {
+    return false;
   }
-  return false;
+  if (map_queue_.size() <= hz) {
+    ROS_WARN("Undersized Map queue. Maps may not represent an accurate time spacing");
+  }
+  res.map = map_queue_.front();
+  return true;
 }
 }  // namespace quirkd
