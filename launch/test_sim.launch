@@ -4,7 +4,7 @@
   <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="2 2 0 1.57079632679 0 0 map odom"/>
 
   <!-- Launch stage with the specified world file-->
-  <node pkg="stage_ros" type="stageros" name="stage" args="$(find quirkd)/world/test_sim.world">
+  <node pkg="stage_ros" type="stageros" name="stage" args="-g $(find quirkd)/world/test_sim.world">
     <remap from="base_pose_ground_truth" to="odom_map"/>
   </node>
 
