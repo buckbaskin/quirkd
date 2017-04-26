@@ -28,15 +28,13 @@
 
 namespace quirkd
 {
-TimeDelayMap::TimeDelayMap(ros::NodeHandle nh) : n_(nh), it_(nh)
+TimeDelayMap::TimeDelayMap(ros::NodeHandle nh) : n_(nh)
 {
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
   static_map_client_ = n_.serviceClient<nav_msgs::GetMap>("static_map");
+  get_map_server_ = n_.advertiseService("/quirkd/ssm/get", &TimeDelayMap::getMapCallback, this);
 
-  original_image_pub_ = it_.advertise("/quirkd/test/original_map", 1);
-  new_section_image_pub_ = it_.advertise("/quirkd/test/new_section", 1);
-  combined_pub_ = it_.advertise("/quirkd/test/combined", 1);
 }
 TimeDelayMap::~TimeDelayMap()
 {
@@ -44,105 +42,28 @@ TimeDelayMap::~TimeDelayMap()
 }
 void TimeDelayMap::run()
 {
-  ROS_INFO("SSM run");
+  ROS_INFO("TDM run");
 
-  nav_msgs::GetMap srv;
-  if (static_map_client_.call(srv))
-  {
-    ROS_DEBUG("Successfull call static map");
-    map_ = srv.response.map;
-  }
-  else
-  {
-    ROS_ERROR("Failed to get static map");
-  }
-
-  ROS_INFO("SSM loop");
-  ros::Rate r(30);
+  ros::Rate r(5);
 
   while (ros::ok())
   {
     ros::spinOnce();
+    nav_msgs::GetMap srv;
+    if (static_map_client_.call(srv))
+    {
+      ROS_DEBUG("Successfull call static map");
+      map_ = srv.response.map;
+    }
+    else
+    {
+      ROS_ERROR("Failed to get static map");
+    }
   }
   ROS_INFO("TimeDelayMap Node Exited.");
-}
-bool TimeDelayMap::setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res) {
-  map_ = req.map;
-  initial_pose_ = req.initial_pose;
-  res.success = true;
-  return true;
-}
-bool TimeDelayMap::updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res) {
-  map_ = req.map;
-  res.success = mergeMap(&map_, &req.map);
-  return res.success;
 }
 bool TimeDelayMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res) {
   res.map = map_;
   return true;
-}
-
-bool TimeDelayMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section) {
-  if (original->header.frame_id != new_section->header.frame_id) {
-    // TODO? use transforms to align properly?
-    // TODO? make sure those transforms are translation only for now
-    return false;
-  }
-  if (original->info.resolution != new_section->info.resolution) {
-    // TODO? make more educated checks and or use OpenCV to scale?
-    return false;
-  }
-  if (original->info.origin.orientation.x != new_section->info.origin.orientation.x ||
-    original->info.origin.orientation.y != new_section->info.origin.orientation.y ||
-    original->info.origin.orientation.z != new_section->info.origin.orientation.z ||
-    original->info.origin.orientation.w != new_section->info.origin.orientation.w) {
-    // TODO? consider allowing rotational alignments in the future
-    return false;
-  }
-  double common_resolution = original->info.resolution;
-  // The maps are in the same frame (map?), the same resolution and oriented in the same direction
-  cv_bridge::CvImagePtr og_img = quirkd::imagep::gridToCvImage(original);
-  original_image_pub_.publish(og_img->toImageMsg());
-  cv_bridge::CvImagePtr new_img = quirkd::imagep::gridToCvImage(new_section);
-  new_section_image_pub_.publish(new_img->toImageMsg());
-
-  cv::Rect og_rect = mapToRect(original);
-  cv::Rect new_rect = mapToRect(new_section);
-
-  cv::Rect both_rect = og_rect | new_rect;
-  cv::Mat both_mat(
-    both_rect.height / common_resolution,
-    both_rect.width / common_resolution,
-    CV_8SC1,
-    cv::Scalar(-1)
-    );
-
-  cv_bridge::CvImagePtr both_ptr;
-  both_ptr->image = both_mat;
-  
-  og_rect.x -= both_rect.x;
-  og_rect.y -= both_rect.y;
-
-  cv::Mat og_dst = both_mat(og_rect);
-  og_img->image.copyTo(og_dst);
-
-  new_rect.x -= both_rect.x;
-  new_rect.y -= both_rect.y;
-
-  cv::Mat new_dst = both_mat(new_rect);
-  new_img->image.copyTo(new_dst);
-
-  combined_pub_.publish(both_ptr->toImageMsg());
-
-  quirkd::imagep::cvImageToGrid(both_ptr, original);
-  return true;
-}
-cv::Rect TimeDelayMap::mapToRect(nav_msgs::OccupancyGrid* map) {
-  float x = map->info.origin.position.x;
-  float y = map->info.origin.position.y;
-  float width = map->info.width * (map->info.resolution);
-  float height = map->info.height * (map->info.resolution);
-  cv::Rect toReturn(x, y, width, height);
-  return toReturn;
 }
 }  // namespace quirkd
