@@ -154,10 +154,11 @@ Visualization Manager:
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point
+    - Class: rviz_plugin_selected_points_topic/PublishSelectedPoints
   Value: true
   Views:
     Current:
-      Angle: -0.0149999
+      Angle: 0.0
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
