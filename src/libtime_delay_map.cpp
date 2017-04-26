@@ -53,11 +53,11 @@ void TimeDelayMap::run()
     nav_msgs::GetMap srv;
     if (dynamic_map_client_.call(srv))
     {
-      ROS_DEBUG("Successfull call dynamic map");
       map_queue_.push_back(srv.response.map);
       while ( (int) (map_queue_.size())  > hz) {
         map_queue_.pop_front();
       }
+      ROS_INFO("Successfull call dynamic_map %d", (int) (map_queue_.size()));
     }
     else
     {
