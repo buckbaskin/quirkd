@@ -20,6 +20,7 @@
  * IN THE SOFTWARE.
  */
 #include <quirkd/ui_manager.h>
+#include <swri_profiler/profiler.h>
 
 namespace quirkd
 {

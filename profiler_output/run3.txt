@@ -1,0 +1,231 @@
+O3 compiling on image_processing, extra profiling output for checking other code sections
+---
+header: 
+  seq: 1
+  stamp: 
+    secs: 1493277621
+    nsecs:   4672869
+  frame_id: /dc_delay
+data: 
+  - 
+    key: 1
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage/resassign data to unsigned floor
+  - 
+    key: 2
+    label: /DataController::update/DataController::updateAlertPerimeter
+  - 
+    key: 3
+    label: /DataController::update
+  - 
+    key: 4
+    label: /DataController::update/static map call
+  - 
+    key: 5
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage
+  - 
+    key: 6
+    label: /DataController::update/imagep::quantifyDifference
+  - 
+    key: 7
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage
+  - 
+    key: 8
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+  - 
+    key: 9
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
+  - 
+    key: 10
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/resassign data to unsigned floor
+  - 
+    key: 11
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
+  - 
+    key: 12
+    label: /DataController::update/dynamic map call
+  - 
+    key: 13
+    label: /DataController::update/imagep::quantifyDifference/Canny calls
+  - 
+    key: 14
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+---
+header: 
+  seq: 123
+  stamp: 
+    secs: 1493277742
+    nsecs:   1215950
+  frame_id: /dc_static
+rostime_stamp: 
+  secs: 124
+  nsecs: 700000000
+data: 
+  - 
+    key: 1
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 0
+      nsecs:   7808056
+    rel_total_duration: 
+      secs: 0
+      nsecs:    137560
+    rel_max_duration: 
+      secs: 0
+      nsecs:    112203
+  - 
+    key: 2
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 120
+      nsecs: 653793332
+    rel_total_duration: 
+      secs: 0
+      nsecs: 997201483
+    rel_max_duration: 
+      secs: 0
+      nsecs: 630816808
+  - 
+    key: 3
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 0
+      nsecs: 987451482
+    rel_total_duration: 
+      secs: 0
+      nsecs:   5137762
+    rel_max_duration: 
+      secs: 0
+      nsecs:   2874513
+  - 
+    key: 4
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 0
+      nsecs: 984613439
+    rel_total_duration: 
+      secs: 0
+      nsecs:   5100813
+    rel_max_duration: 
+      secs: 0
+      nsecs:   2857727
+  - 
+    key: 5
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 19
+      nsecs:  93440922
+    rel_total_duration: 
+      secs: 0
+      nsecs: 161910959
+    rel_max_duration: 
+      secs: 0
+      nsecs:  81966160
+  - 
+    key: 6
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 27
+      nsecs: 434469897
+    rel_total_duration: 
+      secs: 0
+      nsecs: 159591371
+    rel_max_duration: 
+      secs: 0
+      nsecs:  85491528
+  - 
+    key: 7
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 0
+      nsecs:  38945316
+    rel_total_duration: 
+      secs: 0
+      nsecs:    103759
+    rel_max_duration: 
+      secs: 0
+      nsecs:     39438
+  - 
+    key: 8
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 2
+      nsecs: 942636639
+    rel_total_duration: 
+      secs: 0
+      nsecs:  33565120
+    rel_max_duration: 
+      secs: 0
+      nsecs:  20065198
+  - 
+    key: 9
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 31
+      nsecs: 959819895
+    rel_total_duration: 
+      secs: 0
+      nsecs: 294243817
+    rel_max_duration: 
+      secs: 0
+      nsecs: 198072735
+  - 
+    key: 10
+    abs_call_count: 105
+    abs_total_duration: 
+      secs: 36
+      nsecs: 661872629
+    rel_total_duration: 
+      secs: 0
+      nsecs: 332045508
+    rel_max_duration: 
+      secs: 0
+      nsecs: 252528020
+  - 
+    key: 11
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 20
+      nsecs: 181825475
+    rel_total_duration: 
+      secs: 0
+      nsecs: 111323468
+    rel_max_duration: 
+      secs: 0
+      nsecs:  58977583
+  - 
+    key: 12
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 2
+      nsecs:  55813173
+    rel_total_duration: 
+      secs: 0
+      nsecs:  10039200
+    rel_max_duration: 
+      secs: 0
+      nsecs:   5168680
+  - 
+    key: 13
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 29
+      nsecs:   8074152
+    rel_total_duration: 
+      secs: 0
+      nsecs: 185622905
+    rel_max_duration: 
+      secs: 0
+      nsecs: 104048233
+  - 
+    key: 14
+    abs_call_count: 104
+    abs_total_duration: 
+      secs: 0
+      nsecs:  13313834
+    rel_total_duration: 
+      secs: 0
+      nsecs:     77716
+    rel_max_duration: 
+      secs: 0
+      nsecs:     41052
+---
