@@ -147,18 +147,21 @@ void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msg
 
   double live_x, live_y;
 
-  for (int i = 0; i < scan.ranges.size(); i++)
-  {
-    double dist = scan.ranges[i];
+  if(true) {
+    SWRI_PROFILE("for loop to get possible area");  
+    for (int i = 0; i < scan.ranges.size(); i++)
+    {
+      double dist = scan.ranges[i];
 
-    live_x = base_x + dist * cos(heading);
-    live_y = base_y + dist * sin(heading);
-    alert->min_x = std::min(live_x, double(alert->min_x));
-    alert->max_x = std::max(live_x, double(alert->max_x));
-    alert->min_y = std::min(live_y, double(alert->min_y));
-    alert->max_y = std::max(live_y, double(alert->max_y));
+      live_x = base_x + dist * cos(heading);
+      live_y = base_y + dist * sin(heading);
+      alert->min_x = std::min(live_x, double(alert->min_x));
+      alert->max_x = std::max(live_x, double(alert->max_x));
+      alert->min_y = std::min(live_y, double(alert->min_y));
+      alert->max_y = std::max(live_y, double(alert->max_y));
 
-    heading += scan_inc;
+      heading += scan_inc;
+    }
   }
   double padding = 0.5;
   alert->min_x += -padding;

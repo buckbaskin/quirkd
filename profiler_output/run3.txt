@@ -78,12 +78,9 @@ data:
     abs_total_duration: 
       secs: 27
       nsecs: 434469897
-    rel_total_duration: 
+    abs_total_duration / call: 
       secs: 0
-      nsecs: 159591371
-    rel_max_duration: 
-      secs: 0
-      nsecs:  85491528
+      nsecs:  26379298 (8)
   - 
     key: /DataController::update/static map call
     abs_call_count: 104
@@ -116,31 +113,25 @@ data:
       nsecs:  93440922
     abs_total_duration / call: 
       secs: 0
-      nsecs:  18985152
-  - [INTERESTING]
+      nsecs:  18985152 (8)
+  -
     key: /DataController::update/static map call/imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
     abs_call_count: 105
     abs_total_duration: 
       secs: 2
       nsecs: 942636639
-    rel_total_duration: 
+    abs_total_duration / call: 
       secs: 0
-      nsecs:  33565120
-    rel_max_duration: 
-      secs: 0
-      nsecs:  20065198
+      nsecs: 0
   - [INTERESTING]
     key: /DataController::update/static map call/imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
     abs_call_count: 105
     abs_total_duration: 
       secs: 31
       nsecs: 959819895
-    rel_total_duration: 
+    abs_total_duration / call: 
       secs: 0
-      nsecs: 294243817
-    rel_max_duration: 
-      secs: 0
-      nsecs: 198072735
+      nsecs: 304379237 (9)
   - 
     key: /DataController::update/dynamic map call/
     abs_call_count: 105
@@ -159,24 +150,18 @@ data:
     abs_total_duration: 
       secs: 36
       nsecs: 661872629
-    rel_total_duration: 
+    abs_total_duration / call: 
       secs: 0
-      nsecs: 332045508
-    rel_max_duration: 
-      secs: 0
-      nsecs: 252528020
+      nsecs: 349160692 (9)
   - [INTERESTING]
     key: /DataController::update/dynamic map call/
     abs_call_count: 104
     abs_total_duration: 
       secs: 20
       nsecs: 181825475
-    rel_total_duration: 
+    abs_total_duration / call: 
       secs: 0
-      nsecs: 111323468
-    rel_max_duration: 
-      secs: 0
-      nsecs:  58977583
+      nsecs: 194056014 (9)
   - 
     key: /DataController::update/dynamic map call/
     abs_call_count: 104
@@ -209,7 +194,7 @@ data:
       nsecs: 653793332
     abs_total_duration / call:
       secs:   1
-      nsecs: 149083746
+      nsecs: 149083746 (10)
   - 
     key: /DataController::update/imagep::quantifyDifference/Canny calls
     abs_call_count: 104
