@@ -5,7 +5,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "DataControllerNode");
   ros::NodeHandle nh;
   quirkd::DataController dp(nh);
-  ros::Rate r(30);
+  ros::Rate r(5);
 
   dp.update();
   while (ros::ok())
