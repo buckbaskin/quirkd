@@ -65,6 +65,7 @@ void DataController::laserScanCB(const sensor_msgs::LaserScan msg)
 }
 void DataController::update()
 {
+  SWRI_PROFILE("DataController::update");
   quirkd::Alert alert;
   alert.level = 0;
   alert.min_x = 0;
@@ -81,6 +82,7 @@ void DataController::update()
   cv_bridge::CvImagePtr dynamic_image;
   if (static_map_client_.call(srv))
   {
+    SWRI_PROFILE("static map call");
     ROS_DEBUG("Successfull call static map");
     nav_msgs::OccupancyGrid og = srv.response.map;
     static_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
@@ -91,6 +93,7 @@ void DataController::update()
   }
   if (dynamic_map_client_.call(srv))
   {
+    SWRI_PROFILE("dynamic map call");
     ROS_DEBUG("Successfull call dynamic map");
     nav_msgs::OccupancyGrid og = srv.response.map;
     dynamic_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);

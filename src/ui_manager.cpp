@@ -31,6 +31,7 @@ UIManager::UIManager(ros::NodeHandle nh) : n_(nh)
 }
 void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
 {
+  SWRI_PROFILE("UIManager::alertArrayCB");
   ROS_DEBUG("Alert Array CB");
   std::vector<geometry_msgs::Point> points;
   for (size_t i = 0; i < msg.alerts.size(); i++)
