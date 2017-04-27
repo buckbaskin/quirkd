@@ -1,4 +1,8 @@
-O3 compiling on image_processing, extra profiling output for checking other code sections
+Setup:
+-O3 compiling on image_processing, extra profiling output for checking other code sections
+
+Conclusion:
+Identified DataController::update/DataController::updateAlertPerimeter as an area of interest. Likely due to inescapable for loop.
 ---
 header: 
   seq: 1
