@@ -1,0 +1,251 @@
+Setup:
+Checking out the for loop in updateAlertPerimeter
+
+Results:
+
+---
+header: 
+  seq: 1
+  stamp: 
+    secs: 1493280135
+    nsecs:     83288
+  frame_id: /dc_delay
+data: 
+  - 
+    key: 1
+    label: /DataController::update/static map call
+  - 
+    key: 2
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage
+  - 
+    key: 3
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+  - 
+    key: 4
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
+  - 
+    key: 5
+    label: /DataController::update/static map call/imagep::gridToCroppedCvImage/resassign data to unsigned floor
+  - 
+    key: 6
+    label: /DataController::update/DataController::updateAlertPerimeter
+  - 
+    key: 7
+    label: /DataController::update/DataController::updateAlertPerimeter/for loop to get possible area
+  - 
+    key: 8
+    label: /DataController::update
+  - 
+    key: 9
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/resassign data to unsigned floor
+  - 
+    key: 10
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
+  - 
+    key: 11
+    label: /DataController::update/imagep::quantifyDifference/Canny calls
+  - 
+    key: 12
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+  - 
+    key: 13
+    label: /DataController::update/imagep::quantifyDifference
+  - 
+    key: 14
+    label: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage
+  - 
+    key: 15
+    label: /DataController::update/dynamic map call
+---
+
+header: 
+  seq: 1026
+  stamp: 
+    secs: 1493281160
+    nsecs:    165208
+  frame_id: /dc_static
+rostime_stamp: 
+  secs: 1032
+  nsecs: 700000000
+data: 
+  - 
+    key: 1
+    abs_call_count: 1080
+    abs_total_duration: 
+      secs: 7
+      nsecs: 305132638
+    rel_total_duration: 
+      secs: 0
+      nsecs:   3842403
+    rel_max_duration: 
+      secs: 0
+      nsecs:   1936533
+  - 
+    key: 2
+    abs_call_count: 1080
+    abs_total_duration: 
+      secs: 7
+      nsecs: 198094414
+    rel_total_duration: 
+      secs: 0
+      nsecs:   3811005
+    rel_max_duration: 
+      secs: 0
+      nsecs:   1921245
+  - [INTERESTING]
+    key: 3
+    abs_call_count: 1080
+    abs_total_duration: 
+      secs: 250
+      nsecs: 282644712
+    rel_total_duration: 
+      secs: 0
+      nsecs: 117984750
+    rel_max_duration: 
+      secs: 0
+      nsecs: 180915633
+  - [INTERESTING]
+    key: 4
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 268
+      nsecs: 663566711
+    rel_total_duration: 
+      secs: 0
+      nsecs: 131768859
+    rel_max_duration: 
+      secs: 0
+      nsecs: 190160531
+  - 
+    key: 5
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 0
+      nsecs:  76685134
+    rel_total_duration: 
+      secs: 0
+      nsecs:     47457
+    rel_max_duration: 
+      secs: 0
+      nsecs:     25046
+  - 
+    key: /DataController::update/DataController::updateAlertPerimeter
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 0
+      nsecs: 120583959
+    rel_total_duration: 
+      secs: 0
+      nsecs:     70775
+    rel_max_duration: 
+      secs: 0
+      nsecs:     38149
+  - 
+    key: /DataController::update/DataController::updateAlertPerimeter/for loop to get possible area
+    abs_call_count: 1080
+    abs_total_duration: 
+      secs: 0
+      nsecs: 203795056
+    rel_total_duration: 
+      secs: 0
+      nsecs:     75451
+    rel_max_duration: 
+      secs: 0
+      nsecs:     37804
+  - 
+    key: 8
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 146
+      nsecs:  21269958
+    rel_total_duration: 
+      secs: 0
+      nsecs: 106260551
+    rel_max_duration: 
+      secs: 0
+      nsecs:  67394696
+  - 
+    key: 9
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 0
+      nsecs: 217599225
+    rel_total_duration: 
+      secs: 0
+      nsecs:     74045
+    rel_max_duration: 
+      secs: 0
+      nsecs:     38558
+  - 
+    key: 10
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 35
+      nsecs: 222348999
+    rel_total_duration: 
+      secs: 0
+      nsecs:  19531786
+    rel_max_duration: 
+      secs: 0
+      nsecs:  10353260
+  - [Interesting]
+    key: /DataController::update/imagep::quantifyDifference/Canny calls
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 246
+      nsecs: 767841485
+    rel_total_duration: 
+      secs: 0
+      nsecs: 161175858
+    rel_max_duration: 
+      secs: 0
+      nsecs:  92040340
+  - [Interesting]
+    key: /DataController::update/dynamic map call/imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 1013
+      nsecs: 278322514
+    rel_total_duration: 
+      secs: 0
+      nsecs: 974413953
+    rel_max_duration: 
+      secs: 0
+      nsecs: 567088134
+  - [Interesting]
+    key: 13
+    abs_call_count: 1081
+    abs_total_duration: 
+      secs: 266
+      nsecs: 597606484
+    rel_total_duration: 
+      secs: 0
+      nsecs: 172644854
+    rel_max_duration: 
+      secs: 0
+      nsecs:  99221229
+  - 
+    key: 14
+    abs_call_count: 1080
+    abs_total_duration: 
+      secs: 150
+      nsecs: 572122037
+    rel_total_duration: 
+      secs: 0
+      nsecs:  57758860
+    rel_max_duration: 
+      secs: 0
+      nsecs:  57758860
+  - 
+    key: 15
+    abs_call_count: 1080
+    abs_total_duration: 
+      secs: 34
+      nsecs: 632801556
+    rel_total_duration: 
+      secs: 0
+      nsecs:  20324016
+    rel_max_duration: 
+      secs: 0
+      nsecs:  11130950
+---
