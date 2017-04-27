@@ -21,6 +21,8 @@
  */
 #include <quirkd/libimage_processing.h>
 
+#include <swri_profiler/profiler.h>
+
 namespace quirkd
 {
 namespace imagep
@@ -74,6 +76,7 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
 {
   // Unpack the Occupancy Grid
 
+  SWRI_PROFILE("imagep::gridToCroppedCvImage");
   nav_msgs::MapMetaData info = grid->info;
   float resolution = info.resolution;  // meters per pixel
   int cell_width = info.width;
@@ -92,15 +95,17 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   std::vector<uint8_t> unsigned_data;
   unsigned_data.resize(data.size());  // allocate and fill vector to match num elements of data
 
-  for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++)
-  {
-    int8_t old_int = data[i];
-    // assume unknown values (signed -1) are just 0
-    // assumption is that unseen parts of the map have no obstacles until proven otherwise
-    uint8_t new_int = (uint8_t)((old_int == -1) ? 0 : old_int);
-    unsigned_data[(std::vector<uint8_t>::size_type)i] = new_int;
+  if (true) {
+    SWRI_PROFILE("resassign data to unsigned floor");
+    for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++)
+    {
+      int8_t old_int = data[i];
+      // assume unknown values (signed -1) are just 0
+      // assumption is that unseen parts of the map have no obstacles until proven otherwise
+      uint8_t new_int = (uint8_t)((old_int == -1) ? 0 : old_int);
+      unsigned_data[(std::vector<uint8_t>::size_type)i] = new_int;
+    }
   }
-
   // Create the ROS Image Message
 
   sensor_msgs::Image converted_image;
@@ -117,6 +122,7 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
 
   try
   {
+    SWRI_PROFILE("cv_bridge::toCvCopy");
     cv_ptr = cv_bridge::toCvCopy(converted_image, sensor_msgs::image_encodings::MONO8);
   }
   catch (cv_bridge::Exception& e)
@@ -124,7 +130,6 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
     ROS_ERROR("cv_bridge exception: %s", e.what());
   }
 
-  // TODO cut down, shift images to align with perimeter from alert
   /*
    * Use the OpenCV cv::Rect intersection operator to find the
    *  relevant intersection of the full image with the base image
@@ -191,6 +196,7 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   // copy the map overlay to the base image
   if (intersect.area() > 0)
   {
+    SWRI_PROFILE("cropped_map.copyTo(base_roi)");
     cropped_map.copyTo(base_roi);
     ROS_DEBUG("Overlay done");
   }
@@ -216,8 +222,12 @@ std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed, cv::Mat
    */
 
   cv::Mat static_edges, dynamic_edges, static_cdst, dynamic_cdst, unmatched_cdst;
-  cv::Canny(*static_processed, static_edges, 50, 200, 3);  // TODO check these parameters
-  cv::Canny(*dynamic_processed, dynamic_edges, 50, 200, 3);
+  if (true) {
+    SWRI_PROFILE("imagep::quantifyDifference");
+    SWRI_PROFILE("Canny calls");
+    cv::Canny(*static_processed, static_edges, 50, 200, 3);  // TODO check these parameters
+    cv::Canny(*dynamic_processed, dynamic_edges, 50, 200, 3);
+  }
 
   cv::cvtColor(static_edges, static_cdst, CV_GRAY2BGR);
   cv::cvtColor(dynamic_edges, dynamic_cdst, CV_GRAY2BGR);

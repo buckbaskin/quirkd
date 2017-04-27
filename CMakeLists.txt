@@ -4,6 +4,12 @@ project(quirkd)
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "-std=c++11")
+endif()
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -15,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   message_generation
   nav_msgs
-  OpenCV REQUIRED
+  swri_profiler REQUIRED
   sensor_msgs
   std_msgs
   tf

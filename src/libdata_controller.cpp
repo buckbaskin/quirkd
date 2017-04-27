@@ -27,6 +27,7 @@
 
 #include <nav_msgs/GetMap.h>
 #include <sensor_msgs/image_encodings.h>
+#include <swri_profiler/profiler.h>
 
 namespace quirkd
 {
@@ -125,6 +126,7 @@ void DataController::alertToRect(quirkd::Alert* alert, cv::Rect* r)
 void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
                                           const tf::StampedTransform tf)
 {
+  SWRI_PROFILE("DataController::updateAlertPerimeter");
   double base_x = tf.getOrigin().x();
   double base_y = tf.getOrigin().y();
   double r, p, base_heading;
