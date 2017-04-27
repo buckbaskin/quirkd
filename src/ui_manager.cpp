@@ -34,7 +34,7 @@ UIManager::UIManager(ros::NodeHandle nh) : n_(nh)
 void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
 {
   SWRI_PROFILE("UIManager::alertArrayCB");
-  ROS_DEBUG("Alert Array CB");
+  ROS_INFO("Alert Array CB");
   /*
    * points -> rects
    * For each rectangle at the end of the list, roll back through and combine with first intersect
@@ -42,39 +42,46 @@ void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
    * If it doesn't match, put it at the beginning
    */
   // convert to rectangles
-  std::vector<cv::Rect> rectum;
+  std::vector<cv::Rect_<float>> rectum;
   for (size_t i = 0; i < msg.alerts.size(); i++)
   {
-  	cv::Rect r(msg.alerts[i].min_x, msg.alerts[i].min_y, msg.alerts[i].max_x - msg.alerts[i].min_x, msg.alerts[i].max_y - msg.alerts[i].min_y);
-  	rectum.push_back(r);
+    cv::Rect_<float> r(msg.alerts[i].min_x, msg.alerts[i].min_y, msg.alerts[i].max_x - msg.alerts[i].min_x, msg.alerts[i].max_y - msg.alerts[i].min_y);
+    ROS_INFO("r(%f, %f, %f, %f)", r.x, r.y, r.width, r.height);
+    rectum.push_back(r);
   }
+  ROS_INFO("Begin compress rectangles (%d)", (unsigned int) rectum.size());
   // compress rectangles together
-  for (size_t i = rectum.size() - 1; i >= 0; i--)
+  for (int i = (int) rectum.size() - 1; i >= 0; i--)
   {
-    cv::Rect r = rectum[i];
-    for (size_t j = i - 1; i >= 0; i--) {
-    	if ((r & rectum[j]).area() > 0) {
-    		// they two intersect
-    		rectum[j] = rectum[j] | r; // merge them into the j
-    		rectum.erase(rectum.begin()+i); // remove the item at index i
-    		break;
-    	}
+    cv::Rect_<float> r = rectum[i];
+    // ROS_INFO("Try to compress rectangle %d", i);
+    if (i >= 1) {
+        for (int j = (int) i - 1; j >= 0; j--) {
+            if ((r & rectum[j]).area() > 0) {
+                // they two intersect
+                rectum[j] = rectum[j] | r; // merge them into the j
+                rectum.erase(rectum.begin()+i); // remove the item at index i
+                // ROS_INFO("Removed rectangle at index %d", i);
+                break;
+            }
+        }
     }
     /*
      * If no intersection?
      * Then leave the last one at the end and keep going
      */
   }
+  ROS_INFO("Convert to points (%d)", (unsigned int) rectum.size());
   // convert to points
   std::vector<geometry_msgs::Point> points;
-  for (size_t i = rectum.size() - 1; i >= 0; i--)
+  for (int i = (int)rectum.size() - 1; i >= 0; i--)
   {
-  	extendLineList(&points, &rectum[i]);
+    extendLineList(&points, &rectum[i]);
   }
-  ROS_INFO("Alert Array publishLineList %d", (int)points.size());
+  ROS_INFO("Alert Array publishLineList %d", (unsigned int) points.size());
   publishLineList(&line_pub_, &points);
 }
-void UIManager::extendLineList(std::vector<geometry_msgs::Point> *points, cv::Rect *msg)
+void UIManager::extendLineList(std::vector<geometry_msgs::Point>* points, cv::Rect_<float>* msg)
 {
   float min_x = msg->x;
   float min_y = msg->y;
