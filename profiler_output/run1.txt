@@ -1,0 +1,105 @@
+---
+header: 
+  seq: 2
+  stamp: 
+    secs: 1493270092
+    nsecs:    462309
+  frame_id: /dc_static
+data: 
+  - 
+    key: 1
+    label: /DataController::updateAlertPerimeter
+  - 
+    key: 2
+    label: /imagep::gridToCroppedCvImage
+  - 
+    key: 3
+    label: /imagep::gridToCroppedCvImage/resassign data to unsigned floor
+  - 
+    key: 4
+    label: /imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+  - 
+    key: 5
+    label: /imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
+  - 
+    key: 6
+    label: /imagep::quantifyDifference
+  - 
+    key: 7
+    label: /imagep::quantifyDifference/Canny calls
+---
+header: 
+  seq: 153
+  stamp: 
+    secs: 1493270242
+    nsecs:   2080273
+  frame_id: /dc_static
+rostime_stamp: 
+  secs: 158
+  nsecs: 600000000
+data: 
+  - 
+    key: /DataController::updateAlertPerimeter
+    abs_call_count: 52
+    abs_total_duration: 
+      secs: 0
+      nsecs:  39295208
+    abs_total_duration / call:
+      secs: 0
+      nsecs:    755677 (6 digits of nanoseconds)
+
+  - 
+    key: /imagep::gridToCroppedCvImage
+    abs_call_count: 103
+    abs_total_duration: 
+      secs: 124
+      nsecs: 274674109
+    abs_total_duration / call:
+      secs: 1
+      nsecs:  206550234 (10)
+  - 
+    key: /imagep::gridToCroppedCvImage/resassign data to unsigned floor
+    abs_call_count: 103
+    abs_total_duration: 
+      secs: 115
+      nsecs: 317842019
+    abs_total_duration / call:
+      secs: 1
+      nsecs:  119590699 (10)
+  - 
+    key: /imagep::gridToCroppedCvImage/cropped_map.copyTo(base_roi)
+    abs_call_count: 102
+    abs_total_duration: 
+      secs: 0
+      nsecs:  10584376
+    abs_total_duration / call:
+      secs: 0
+      nsecs:    103768 (6)
+  - 
+    key: /imagep::gridToCroppedCvImage/cv_bridge::toCvCopy
+    abs_call_count: 102
+    abs_total_duration: 
+      secs: 1
+      nsecs: 732049887
+    abs_total_duration / call:
+      secs: 0
+      nsecs:  16980881 (8)
+  - 
+    key: /imagep::quantifyDifference
+    abs_call_count: 51
+    abs_total_duration: 
+      secs: 0
+      nsecs: 432302371
+    abs_total_duration / call:
+      secs: 0
+      nsecs:   8476517 (7)
+  - 
+    key: /imagep::quantifyDifference/Canny calls
+    abs_call_count: 51
+    abs_total_duration: 
+      secs: 0
+      nsecs: 398363170
+    abs_total_duration / call:
+      secs: 0
+      nsecs:   7811042 (7)
+---

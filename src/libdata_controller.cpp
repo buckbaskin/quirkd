@@ -27,12 +27,13 @@
 
 #include <nav_msgs/GetMap.h>
 #include <sensor_msgs/image_encodings.h>
+#include <swri_profiler/profiler.h>
 
 namespace quirkd
 {
 DataController::DataController(ros::NodeHandle nh) : n_(nh), it_(n_)
 {
-  alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/"+ros::this_node::getName()+"/alert_array", 1);
+  alert_pub_ = n_.advertise<quirkd::AlertArray>("/quirkd/" + ros::this_node::getName() + "/alert_array", 1);
   laser_sub_ = n_.subscribe("/base_scan", 1, &DataController::laserScanCB, this);
   ROS_INFO("WaitForService(\"static_map\");");
   ros::service::waitForService("static_map");
@@ -40,9 +41,7 @@ DataController::DataController(ros::NodeHandle nh) : n_(nh), it_(n_)
   ROS_INFO("WaitForService(\"dynamic_map\");");
   ros::service::waitForService("dynamic_map");
   dynamic_map_client_ = n_.serviceClient<nav_msgs::GetMap>("dynamic_map");
-  static_image_pub_ = it_.advertise("/quirkd/"+ros::this_node::getName()+"/static_image", 1);
-  dynamic_image_pub_ = it_.advertise("/quirkd/"+ros::this_node::getName()+"/dynamic_image", 1);
-  visualization_pub_ = it_.advertise("/quirkd/"+ros::this_node::getName()+"/visualization", 1);
+  visualization_pub_ = it_.advertise("/quirkd/" + ros::this_node::getName() + "/visualization", 1);
 }
 DataController::~DataController()
 {
@@ -66,6 +65,7 @@ void DataController::laserScanCB(const sensor_msgs::LaserScan msg)
 }
 void DataController::update()
 {
+  SWRI_PROFILE("DataController::update");
   quirkd::Alert alert;
   alert.level = 0;
   alert.min_x = 0;
@@ -82,11 +82,10 @@ void DataController::update()
   cv_bridge::CvImagePtr dynamic_image;
   if (static_map_client_.call(srv))
   {
+    SWRI_PROFILE("static map call");
     ROS_DEBUG("Successfull call static map");
     nav_msgs::OccupancyGrid og = srv.response.map;
     static_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
-
-    static_image_pub_.publish(static_image->toImageMsg());
   }
   else
   {
@@ -94,11 +93,10 @@ void DataController::update()
   }
   if (dynamic_map_client_.call(srv))
   {
+    SWRI_PROFILE("dynamic map call");
     ROS_DEBUG("Successfull call dynamic map");
     nav_msgs::OccupancyGrid og = srv.response.map;
     dynamic_image = quirkd::imagep::gridToCroppedCvImage(&og, &alert_rect);
-
-    dynamic_image_pub_.publish(dynamic_image->toImageMsg());
   }
   else
   {
@@ -116,7 +114,8 @@ void DataController::update()
   ROS_INFO("PUBLISHING %d alerts", (int)(aa.alerts.size()));
   alert_pub_.publish(aa);
 }
-void DataController::alertToRect(quirkd::Alert* alert, cv::Rect* r) {
+void DataController::alertToRect(quirkd::Alert* alert, cv::Rect* r)
+{
   alert->min_x;
   alert->max_x;
   alert->min_y;
@@ -130,6 +129,7 @@ void DataController::alertToRect(quirkd::Alert* alert, cv::Rect* r) {
 void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msgs::LaserScan scan,
                                           const tf::StampedTransform tf)
 {
+  SWRI_PROFILE("DataController::updateAlertPerimeter");
   double base_x = tf.getOrigin().x();
   double base_y = tf.getOrigin().y();
   double r, p, base_heading;
@@ -147,18 +147,21 @@ void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msg
 
   double live_x, live_y;
 
-  for (int i = 0; i < scan.ranges.size(); i++)
-  {
-    double dist = scan.ranges[i];
+  if(true) {
+    SWRI_PROFILE("for loop to get possible area");  
+    for (int i = 0; i < scan.ranges.size(); i++)
+    {
+      double dist = scan.ranges[i];
 
-    live_x = base_x + dist * cos(heading);
-    live_y = base_y + dist * sin(heading);
-    alert->min_x = std::min(live_x, double(alert->min_x));
-    alert->max_x = std::max(live_x, double(alert->max_x));
-    alert->min_y = std::min(live_y, double(alert->min_y));
-    alert->max_y = std::max(live_y, double(alert->max_y));
+      live_x = base_x + dist * cos(heading);
+      live_y = base_y + dist * sin(heading);
+      alert->min_x = std::min(live_x, double(alert->min_x));
+      alert->max_x = std::max(live_x, double(alert->max_x));
+      alert->min_y = std::min(live_y, double(alert->min_y));
+      alert->max_y = std::max(live_y, double(alert->max_y));
 
-    heading += scan_inc;
+      heading += scan_inc;
+    }
   }
   double padding = 0.5;
   alert->min_x += -padding;

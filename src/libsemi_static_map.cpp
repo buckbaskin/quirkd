@@ -69,36 +69,43 @@ void SemiStaticMap::run()
   }
   ROS_INFO("SemiStaticMap Node Exited.");
 }
-bool SemiStaticMap::setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res) {
+bool SemiStaticMap::setMapCallback(nav_msgs::SetMap::Request& req, nav_msgs::SetMap::Response& res)
+{
   map_ = req.map;
   initial_pose_ = req.initial_pose;
   res.success = true;
   return true;
 }
-bool SemiStaticMap::updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res) {
+bool SemiStaticMap::updateMapCallback(quirkd::UpdateMap::Request& req, quirkd::UpdateMap::Response& res)
+{
   map_ = req.map;
   res.success = mergeMap(&map_, &req.map);
   return res.success;
 }
-bool SemiStaticMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res) {
+bool SemiStaticMap::getMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res)
+{
   res.map = map_;
   return true;
 }
 
-bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section) {
-  if (original->header.frame_id != new_section->header.frame_id) {
+bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::OccupancyGrid* new_section)
+{
+  if (original->header.frame_id != new_section->header.frame_id)
+  {
     // TODO? use transforms to align properly?
     // TODO? make sure those transforms are translation only for now
     return false;
   }
-  if (original->info.resolution != new_section->info.resolution) {
+  if (original->info.resolution != new_section->info.resolution)
+  {
     // TODO? make more educated checks and or use OpenCV to scale?
     return false;
   }
   if (original->info.origin.orientation.x != new_section->info.origin.orientation.x ||
-    original->info.origin.orientation.y != new_section->info.origin.orientation.y ||
-    original->info.origin.orientation.z != new_section->info.origin.orientation.z ||
-    original->info.origin.orientation.w != new_section->info.origin.orientation.w) {
+      original->info.origin.orientation.y != new_section->info.origin.orientation.y ||
+      original->info.origin.orientation.z != new_section->info.origin.orientation.z ||
+      original->info.origin.orientation.w != new_section->info.origin.orientation.w)
+  {
     // TODO? consider allowing rotational alignments in the future
     return false;
   }
@@ -113,16 +120,11 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   cv::Rect new_rect = mapToRect(new_section);
 
   cv::Rect both_rect = og_rect | new_rect;
-  cv::Mat both_mat(
-    both_rect.height / common_resolution,
-    both_rect.width / common_resolution,
-    CV_8SC1,
-    cv::Scalar(-1)
-    );
+  cv::Mat both_mat(both_rect.height / common_resolution, both_rect.width / common_resolution, CV_8SC1, cv::Scalar(-1));
 
   cv_bridge::CvImagePtr both_ptr;
   both_ptr->image = both_mat;
-  
+
   og_rect.x -= both_rect.x;
   og_rect.y -= both_rect.y;
 
@@ -140,7 +142,8 @@ bool SemiStaticMap::mergeMap(nav_msgs::OccupancyGrid* original, nav_msgs::Occupa
   quirkd::imagep::cvImageToGrid(both_ptr, original);
   return true;
 }
-cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map) {
+cv::Rect SemiStaticMap::mapToRect(nav_msgs::OccupancyGrid* map)
+{
   float x = map->info.origin.position.x;
   float y = map->info.origin.position.y;
   float width = map->info.width * (map->info.resolution);

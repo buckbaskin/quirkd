@@ -21,14 +21,17 @@
  */
 #include <quirkd/libimage_processing.h>
 
+#include <swri_profiler/profiler.h>
+
 namespace quirkd
 {
 namespace imagep
 {
-void cvImageToGrid(cv_bridge::CvImagePtr ptr, nav_msgs::OccupancyGrid* grid) {
-  
+void cvImageToGrid(cv_bridge::CvImagePtr ptr, nav_msgs::OccupancyGrid* grid)
+{
 }
-cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid) {
+cv_bridge::CvImagePtr gridToCvImage(nav_msgs::OccupancyGrid* grid)
+{
   nav_msgs::MapMetaData info = grid->info;
   float resolution = info.resolution;  // meters per pixel
   int cell_width = info.width;
@@ -73,6 +76,7 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
 {
   // Unpack the Occupancy Grid
 
+  SWRI_PROFILE("imagep::gridToCroppedCvImage");
   nav_msgs::MapMetaData info = grid->info;
   float resolution = info.resolution;  // meters per pixel
   int cell_width = info.width;
@@ -91,15 +95,17 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   std::vector<uint8_t> unsigned_data;
   unsigned_data.resize(data.size());  // allocate and fill vector to match num elements of data
 
-  for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++)
-  {
-    int8_t old_int = data[i];
-    // assume unknown values (signed -1) are just 0
-    // assumption is that unseen parts of the map have no obstacles until proven otherwise
-    uint8_t new_int = (uint8_t)((old_int == -1) ? 0 : old_int);
-    unsigned_data[(std::vector<uint8_t>::size_type)i] = new_int;
+  if (true) {
+    SWRI_PROFILE("resassign data to unsigned floor");
+    for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++)
+    {
+      int8_t old_int = data[i];
+      // assume unknown values (signed -1) are just 0
+      // assumption is that unseen parts of the map have no obstacles until proven otherwise
+      uint8_t new_int = (uint8_t)((old_int == -1) ? 0 : old_int);
+      unsigned_data[(std::vector<uint8_t>::size_type)i] = new_int;
+    }
   }
-
   // Create the ROS Image Message
 
   sensor_msgs::Image converted_image;
@@ -116,6 +122,7 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
 
   try
   {
+    SWRI_PROFILE("cv_bridge::toCvCopy");
     cv_ptr = cv_bridge::toCvCopy(converted_image, sensor_msgs::image_encodings::MONO8);
   }
   catch (cv_bridge::Exception& e)
@@ -123,7 +130,6 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
     ROS_ERROR("cv_bridge exception: %s", e.what());
   }
 
-  // TODO cut down, shift images to align with perimeter from alert
   /*
    * Use the OpenCV cv::Rect intersection operator to find the
    *  relevant intersection of the full image with the base image
@@ -137,9 +143,9 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   cv::Rect map_region(map_cell_origin_x, map_cell_origin_y, cell_width, cell_height);
   ROS_DEBUG("map x %d y %d w %d h %d", map_region.x, map_region.y, map_region.width, map_region.height);
 
-  int p_cell_origin_x = (int)(alert->x / resolution);                // pixels
-  int p_cell_origin_y = (int)(alert->y / resolution);                // pixels
-  int perim_width = (int)(alert->width / resolution);   // pixels
+  int p_cell_origin_x = (int)(alert->x / resolution);    // pixels
+  int p_cell_origin_y = (int)(alert->y / resolution);    // pixels
+  int perim_width = (int)(alert->width / resolution);    // pixels
   int perim_height = (int)(alert->height / resolution);  // pixels
   ROS_DEBUG("perim w: %d h: %d", perim_width, perim_height);
 
@@ -190,6 +196,7 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   // copy the map overlay to the base image
   if (intersect.area() > 0)
   {
+    SWRI_PROFILE("cropped_map.copyTo(base_roi)");
     cropped_map.copyTo(base_roi);
     ROS_DEBUG("Overlay done");
   }
@@ -201,13 +208,11 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   cv_ptr->image = base;
   return cv_ptr;
 }
-void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert) {
-
+void preprocessImages(cv::Mat* static_image, cv::Mat* dynamic_image, quirkd::Alert* alert)
+{
 }
-std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
-                                              cv::Mat* dynamic_processed,
-                                              quirkd::Alert* alert,
-                                              image_transport::Publisher* visualization_pub)
+std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed, cv::Mat* dynamic_processed,
+                                              quirkd::Alert* alert, image_transport::Publisher* visualization_pub)
 {
   /* Compute difference
    * Steps:
@@ -217,8 +222,12 @@ std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
    */
 
   cv::Mat static_edges, dynamic_edges, static_cdst, dynamic_cdst, unmatched_cdst;
-  cv::Canny(*static_processed, static_edges, 50, 200, 3);  // TODO check these parameters
-  cv::Canny(*dynamic_processed, dynamic_edges, 50, 200, 3);
+  if (true) {
+    SWRI_PROFILE("imagep::quantifyDifference");
+    SWRI_PROFILE("Canny calls");
+    cv::Canny(*static_processed, static_edges, 50, 200, 3);  // TODO check these parameters
+    cv::Canny(*dynamic_processed, dynamic_edges, 50, 200, 3);
+  }
 
   cv::cvtColor(static_edges, static_cdst, CV_GRAY2BGR);
   cv::cvtColor(dynamic_edges, dynamic_cdst, CV_GRAY2BGR);
@@ -277,8 +286,7 @@ std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed,
   std::vector<quirkd::Alert> alerts = minimizeAlerts(unmatched_static, unmatched_dynamic, alert);
   return alerts;
 }
-std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original,
-                                                             std::vector<cv::Vec4i> new_edges)
+std::vector<cv::Vec4i> filterEdgesByMatching(std::vector<cv::Vec4i> original, std::vector<cv::Vec4i> new_edges)
 {
   std::vector<cv::Vec4i> unmatched_set;
   const double limit = 1000;
@@ -330,8 +338,7 @@ double distance_measure(int start_x, int start_y, int end_x, int end_y)
   return pow(start_x - end_x, 2) + pow(start_y - end_y, 2);
 }
 std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_static,
-                                                          std::vector<cv::Vec4i> unmatched_dynamic,
-                                                          quirkd::Alert* alert_msg)
+                                          std::vector<cv::Vec4i> unmatched_dynamic, quirkd::Alert* alert_msg)
 {
   std::vector<quirkd::Alert> alerts;
   float map_resolution = 0.05;  // meters per cell/pixel
@@ -389,15 +396,14 @@ std::vector<quirkd::Alert> minimizeAlerts(std::vector<cv::Vec4i> unmatched_stati
   }
   return alerts;
 }
-std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image,
-                                             cv_bridge::CvImage dynamic_image,
-                                             quirkd::Alert* alert,
-                                             image_transport::Publisher* visualization_pub)
+std::vector<quirkd::Alert> measureDifference(cv_bridge::CvImage static_image, cv_bridge::CvImage dynamic_image,
+                                             quirkd::Alert* alert, image_transport::Publisher* visualization_pub)
 {
   quirkd::imagep::preprocessImages(&(static_image.image), &(dynamic_image.image), alert);
-  std::vector<quirkd::Alert> result = quantifyDifference(&(static_image.image), &(dynamic_image.image), alert, visualization_pub);
+  std::vector<quirkd::Alert> result =
+      quantifyDifference(&(static_image.image), &(dynamic_image.image), alert, visualization_pub);
   return result;
 }
 
-} // namespace imagep
-} // namespace quirkd
+}  // namespace imagep
+}  // namespace quirkd
