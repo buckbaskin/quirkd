@@ -20,6 +20,7 @@
  * IN THE SOFTWARE.
  */
 #include <quirkd/ui_manager.h>
+
 #include <swri_profiler/profiler.h>
 
 namespace quirkd
@@ -33,40 +34,88 @@ UIManager::UIManager(ros::NodeHandle nh) : n_(nh)
 void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
 {
   SWRI_PROFILE("UIManager::alertArrayCB");
-  ROS_DEBUG("Alert Array CB");
-  std::vector<geometry_msgs::Point> points;
+  ROS_INFO("Alert Array CB");
+  /*
+   * points -> rects
+   * For each rectangle at the end of the list, roll back through and combine with first intersect
+   * 
+   * If it doesn't match, put it at the beginning
+   */
+  // convert to rectangles
+  const float buffer = 0.5;
+  const float padding = 0.5;
+  std::vector<cv::Rect_<float>> rectum;
   for (size_t i = 0; i < msg.alerts.size(); i++)
   {
-    quirkd::Alert alert = msg.alerts[i];
-    extendLineList(&points, &alert);
+    cv::Rect_<float> r(
+        msg.alerts[i].min_x - buffer/2 + padding,
+        msg.alerts[i].min_y - buffer/2 + padding,
+        msg.alerts[i].max_x - msg.alerts[i].min_x + buffer/2,
+        msg.alerts[i].max_y - msg.alerts[i].min_y + buffer/2);
+    ROS_INFO("r(%f, %f, %f, %f)", r.x, r.y, r.width, r.height);
+    rectum.push_back(r);
   }
-  ROS_INFO("Alert Array publishLineList %d", (int)points.size());
+  ROS_INFO("Begin compress rectangles (%d)", (unsigned int) rectum.size());
+  // compress rectangles together
+  for (int i = (int) rectum.size() - 1; i >= 0; i--)
+  {
+    cv::Rect_<float> r = rectum[i];
+    // ROS_INFO("Try to compress rectangle %d", i);
+    if (i >= 1) {
+        for (int j = (int) i - 1; j >= 0; j--) {
+            if ((r & rectum[j]).area() > 0) {
+                // they two intersect
+                rectum[j] = rectum[j] | r; // merge them into the j
+                rectum.erase(rectum.begin()+i); // remove the item at index i
+                // ROS_INFO("Removed rectangle at index %d", i);
+                break;
+            }
+        }
+    }
+    /*
+     * If no intersection?
+     * Then leave the last one at the end and keep going
+     */
+  }
+  ROS_INFO("Convert to points (%d)", (unsigned int) rectum.size());
+  // convert to points
+  std::vector<geometry_msgs::Point> points;
+  for (int i = (int)rectum.size() - 1; i >= 0; i--)
+  {
+    extendLineList(&points, &rectum[i]);
+  }
+  ROS_INFO("Alert Array publishLineList %d", (unsigned int) points.size());
   publishLineList(&line_pub_, &points);
 }
-void UIManager::extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg)
+void UIManager::extendLineList(std::vector<geometry_msgs::Point>* points, cv::Rect_<float>* msg)
 {
-  if (msg->max_x - msg->min_x < 0.1)
+  float min_x = msg->x;
+  float min_y = msg->y;
+  float max_x = msg->x + msg->width;
+  float max_y = msg->y + msg->height;
+
+  if (max_x - min_x < 0.1)
   {
-    msg->max_x += 0.05;
-    msg->min_x -= 0.05;
+    max_x += 0.05;
+    min_x -= 0.05;
   }
-  if (msg->max_y - msg->min_y < 0.1)
+  if (max_y - min_y < 0.1)
   {
-    msg->max_y += 0.05;
-    msg->min_y -= 0.05;
+    max_y += 0.05;
+    min_y -= 0.05;
   }
   geometry_msgs::Point minmin;
-  minmin.x = msg->min_x;
-  minmin.y = msg->min_y;
+  minmin.x = min_x;
+  minmin.y = min_y;
   geometry_msgs::Point minmax;
-  minmax.x = msg->min_x;
-  minmax.y = msg->max_y;
+  minmax.x = min_x;
+  minmax.y = max_y;
   geometry_msgs::Point maxmax;
-  maxmax.x = msg->max_x;
-  maxmax.y = msg->max_y;
+  maxmax.x = max_x;
+  maxmax.y = max_y;
   geometry_msgs::Point maxmin;
-  maxmin.x = msg->max_x;
-  maxmin.y = msg->min_y;
+  maxmin.x = max_x;
+  maxmin.y = min_y;
 
   points->push_back(minmin);
   points->push_back(minmax);
@@ -99,7 +148,7 @@ void UIManager::publishLineList(ros::Publisher *pub, std::vector<geometry_msgs::
   marker.pose.orientation.z = 0.0;
   marker.pose.orientation.w = 1.0;
 
-  marker.scale.x = 0.05;
+  marker.scale.x = 0.1;
   // Chance color based on level
   marker.color.a = 1.0;
   marker.color.r = 1.0;

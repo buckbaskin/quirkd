@@ -23,6 +23,8 @@
 #define QUIRKD_UI_MANAGER_H
 
 #include <ros/ros.h>
+
+#include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PolygonStamped.h>
 #include <quirkd/Alert.h>
@@ -37,7 +39,7 @@ public:
   UIManager(ros::NodeHandle nh);
   void alertCB(const quirkd::Alert &alert);
   void alertArrayCB(const quirkd::AlertArray &msg);
-  void extendLineList(std::vector<geometry_msgs::Point> *points, quirkd::Alert *msg);
+  void extendLineList(std::vector<geometry_msgs::Point> *points, cv::Rect_<float> *msg);
   void publishLineList(ros::Publisher *pub, std::vector<geometry_msgs::Point> *points);
   void publishPolygon(ros::Publisher *pub, float min_x, float max_x, float min_y, float max_y);
 
