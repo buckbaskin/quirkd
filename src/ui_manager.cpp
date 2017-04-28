@@ -42,10 +42,16 @@ void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
    * If it doesn't match, put it at the beginning
    */
   // convert to rectangles
+  const float buffer = 0.5;
+  const float padding = 0.5;
   std::vector<cv::Rect_<float>> rectum;
   for (size_t i = 0; i < msg.alerts.size(); i++)
   {
-    cv::Rect_<float> r(msg.alerts[i].min_x, msg.alerts[i].min_y, msg.alerts[i].max_x - msg.alerts[i].min_x, msg.alerts[i].max_y - msg.alerts[i].min_y);
+    cv::Rect_<float> r(
+        msg.alerts[i].min_x - buffer/2 + padding,
+        msg.alerts[i].min_y - buffer/2 + padding,
+        msg.alerts[i].max_x - msg.alerts[i].min_x + buffer/2,
+        msg.alerts[i].max_y - msg.alerts[i].min_y + buffer/2);
     ROS_INFO("r(%f, %f, %f, %f)", r.x, r.y, r.width, r.height);
     rectum.push_back(r);
   }
@@ -142,7 +148,7 @@ void UIManager::publishLineList(ros::Publisher *pub, std::vector<geometry_msgs::
   marker.pose.orientation.z = 0.0;
   marker.pose.orientation.w = 1.0;
 
-  marker.scale.x = 0.05;
+  marker.scale.x = 0.1;
   // Chance color based on level
   marker.color.a = 1.0;
   marker.color.r = 1.0;
