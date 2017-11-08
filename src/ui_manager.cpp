@@ -38,7 +38,7 @@ void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
   /*
    * points -> rects
    * For each rectangle at the end of the list, roll back through and combine with first intersect
-   * 
+   *
    * If it doesn't match, put it at the beginning
    */
   // convert to rectangles
@@ -47,47 +47,48 @@ void UIManager::alertArrayCB(const quirkd::AlertArray &msg)
   std::vector<cv::Rect_<float>> rectum;
   for (size_t i = 0; i < msg.alerts.size(); i++)
   {
-    cv::Rect_<float> r(
-        msg.alerts[i].min_x - buffer/2 + padding,
-        msg.alerts[i].min_y - buffer/2 + padding,
-        msg.alerts[i].max_x - msg.alerts[i].min_x + buffer/2,
-        msg.alerts[i].max_y - msg.alerts[i].min_y + buffer/2);
+    cv::Rect_<float> r(msg.alerts[i].min_x - buffer / 2 + padding, msg.alerts[i].min_y - buffer / 2 + padding,
+                       msg.alerts[i].max_x - msg.alerts[i].min_x + buffer / 2,
+                       msg.alerts[i].max_y - msg.alerts[i].min_y + buffer / 2);
     ROS_INFO("r(%f, %f, %f, %f)", r.x, r.y, r.width, r.height);
     rectum.push_back(r);
   }
-  ROS_INFO("Begin compress rectangles (%d)", (unsigned int) rectum.size());
+  ROS_INFO("Begin compress rectangles (%d)", (unsigned int)rectum.size());
   // compress rectangles together
-  for (int i = (int) rectum.size() - 1; i >= 0; i--)
+  for (int i = (int)rectum.size() - 1; i >= 0; i--)
   {
     cv::Rect_<float> r = rectum[i];
     // ROS_INFO("Try to compress rectangle %d", i);
-    if (i >= 1) {
-        for (int j = (int) i - 1; j >= 0; j--) {
-            if ((r & rectum[j]).area() > 0) {
-                // they two intersect
-                rectum[j] = rectum[j] | r; // merge them into the j
-                rectum.erase(rectum.begin()+i); // remove the item at index i
-                // ROS_INFO("Removed rectangle at index %d", i);
-                break;
-            }
+    if (i >= 1)
+    {
+      for (int j = (int)i - 1; j >= 0; j--)
+      {
+        if ((r & rectum[j]).area() > 0)
+        {
+          // they two intersect
+          rectum[j] = rectum[j] | r;         // merge them into the j
+          rectum.erase(rectum.begin() + i);  // remove the item at index i
+          // ROS_INFO("Removed rectangle at index %d", i);
+          break;
         }
+      }
     }
     /*
      * If no intersection?
      * Then leave the last one at the end and keep going
      */
   }
-  ROS_INFO("Convert to points (%d)", (unsigned int) rectum.size());
+  ROS_INFO("Convert to points (%d)", (unsigned int)rectum.size());
   // convert to points
   std::vector<geometry_msgs::Point> points;
   for (int i = (int)rectum.size() - 1; i >= 0; i--)
   {
     extendLineList(&points, &rectum[i]);
   }
-  ROS_INFO("Alert Array publishLineList %d", (unsigned int) points.size());
+  ROS_INFO("Alert Array publishLineList %d", (unsigned int)points.size());
   publishLineList(&line_pub_, &points);
 }
-void UIManager::extendLineList(std::vector<geometry_msgs::Point>* points, cv::Rect_<float>* msg)
+void UIManager::extendLineList(std::vector<geometry_msgs::Point> *points, cv::Rect_<float> *msg)
 {
   float min_x = msg->x;
   float min_y = msg->y;

@@ -95,7 +95,8 @@ cv_bridge::CvImagePtr gridToCroppedCvImage(nav_msgs::OccupancyGrid* grid, cv::Re
   std::vector<uint8_t> unsigned_data;
   unsigned_data.resize(data.size());  // allocate and fill vector to match num elements of data
 
-  if (true) {
+  if (true)
+  {
     SWRI_PROFILE("resassign data to unsigned floor");
     for (std::vector<int8_t>::size_type i = 0; i < data.size(); i++)
     {
@@ -222,7 +223,8 @@ std::vector<quirkd::Alert> quantifyDifference(cv::Mat* static_processed, cv::Mat
    */
 
   cv::Mat static_edges, dynamic_edges, static_cdst, dynamic_cdst, unmatched_cdst;
-  if (true) {
+  if (true)
+  {
     SWRI_PROFILE("imagep::quantifyDifference");
     SWRI_PROFILE("Canny calls");
     cv::Canny(*static_processed, static_edges, 50, 200, 3);  // TODO check these parameters

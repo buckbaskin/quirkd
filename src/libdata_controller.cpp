@@ -147,8 +147,9 @@ void DataController::updateAlertPerimeter(quirkd::Alert* alert, const sensor_msg
 
   double live_x, live_y;
 
-  if(true) {
-    SWRI_PROFILE("for loop to get possible area");  
+  if (true)
+  {
+    SWRI_PROFILE("for loop to get possible area");
     for (int i = 0; i < scan.ranges.size(); i++)
     {
       double dist = scan.ranges[i];
